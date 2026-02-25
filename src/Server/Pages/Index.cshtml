@@ -10,32 +10,32 @@
 
 <!-- Stat Bar -->
 <div class="stat-grid">
-    <div class="stat-card">
+    <div class="stat-card" onclick="setFilter('')" tabindex="0" title="คลิกเพื่อดูทั้งหมด">
         <div class="stat-icon">🖥️</div>
         <div class="stat-content">
             <div class="stat-value">@Model.TotalDevices</div>
             <div class="stat-label">ทั้งหมด</div>
         </div>
     </div>
-    <div class="stat-card success">
+    <div class="stat-card success" onclick="setFilter('online')" tabindex="0" title="คลิกเพื่อดูเฉพาะ Online">
         <div class="stat-icon">🟢</div>
         <div class="stat-content">
             <div class="stat-value">@Model.OnlineDevices</div>
-            <div class="stat-label">Online</div>
+            <div class="stat-label">ONLINE</div>
         </div>
     </div>
-    <div class="stat-card warning">
+    <div class="stat-card warning" onclick="setFilter('degraded')" tabindex="0" title="คลิกเพื่อดูเฉพาะ Warning">
         <div class="stat-icon">⚠️</div>
         <div class="stat-content">
             <div class="stat-value">@Model.WarningDevices</div>
-            <div class="stat-label">Warning</div>
+            <div class="stat-label">WARNING</div>
         </div>
     </div>
-    <div class="stat-card danger">
+    <div class="stat-card danger" onclick="setFilter('offline')" tabindex="0" title="คลิกเพื่อดูเฉพาะ Offline">
         <div class="stat-icon">🔴</div>
         <div class="stat-content">
             <div class="stat-value">@Model.OfflineDevices</div>
-            <div class="stat-label">Offline</div>
+            <div class="stat-label">OFFLINE</div>
         </div>
     </div>
 </div>
@@ -102,7 +102,8 @@ else
                         <div class="pos-rows">
                             @foreach (var device in store.Devices)
                             {
-                                var sc = device.Status.ToString().ToLower();
+                                var statusRaw = device.Status.ToString().ToLower();
+                                var sc = (device.Status == DeviceStatus.Unknown) ? "degraded" : statusRaw;
                                 var lastTime = device.LastHeartbeatAt?.ToLocalTime().ToString("HH:mm") ?? "--:--";
                                 <div class="pos-row @sc"
                                      data-status="@sc"
@@ -130,6 +131,11 @@ else
 /* Result bar */
 .result-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:0.82rem;color:var(--text-muted)}
 .updated-at{font-size:0.78rem}
+
+/* Stat Cards click style */
+.stat-card{cursor:pointer;transition:transform 0.15s, box-shadow 0.15s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 10px 25px -5px rgba(0,0,0,0.1),0 8px 10px -6px rgba(0,0,0,0.1)}
+.stat-card:active{transform:translateY(0)}
 
 /* Empty */
 .empty-state-full{text-align:center;padding:60px 20px;color:var(--text-muted)}
@@ -184,6 +190,11 @@ else
 </style>
 
 <script>
+    function setFilter(status) {
+        document.getElementById('statusFilter').value = status;
+        filterAll();
+    }
+
     function filterAll() {
         const search = document.getElementById('searchInput').value.toLowerCase();
         const company = document.getElementById('companyFilter').value.toLowerCase();
