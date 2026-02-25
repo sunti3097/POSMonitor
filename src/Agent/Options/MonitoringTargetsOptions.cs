@@ -14,17 +14,20 @@ public class MonitoringTargetsOptions
         public int TimeoutMilliseconds { get; set; } = 1500;
     }
 
+    public List<string> PingTargets { get; set; } = new();
+
     public class ServiceTargetOptions
     {
-        public string Name { get; set; } = string.Empty;
+        public string ServiceName { get; set; } = string.Empty;
         public string? DisplayName { get; set; }
         public bool AutoRestart { get; set; } = true;
     }
 
     public class ProcessTargetOptions
     {
-        public string Name { get; set; } = string.Empty;
-        public string Path { get; set; } = string.Empty;
+        public string ProcessName { get; set; } = string.Empty;
+        public string? DisplayName { get; set; }
+        public string ExecutablePath { get; set; } = string.Empty;
         public bool AutoRestart { get; set; } = true;
     }
 }

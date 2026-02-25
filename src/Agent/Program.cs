@@ -5,6 +5,7 @@ using POSMonitor.Agent.Repositories;
 using POSMonitor.Agent.Services;
 
 var host = Host.CreateDefaultBuilder(args)
+    .UseWindowsService()
     .ConfigureServices((context, services) =>
     {
         services.Configure<AgentOptions>(context.Configuration.GetSection(AgentOptions.SectionName));

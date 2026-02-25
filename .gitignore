@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+
+# Publish output
+publish/
+
+# User secrets / environment
+appsettings.Development.json
+*.user
+.vs/
+.vscode/
+
+# NuGet
+*.nupkg
+.nuget/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# EF migrations temp
+*.Designer.cs.bak
+
+# Sensitive backups
+appsettings_back.json

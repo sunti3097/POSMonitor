@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using POSMonitor.Server.Data.Entities;
 
 namespace POSMonitor.Server.Data;
 
-public class POSMonitorDbContext : DbContext
+public class POSMonitorDbContext : IdentityDbContext<AppUser>
 {
     public POSMonitorDbContext(DbContextOptions<POSMonitorDbContext> options) : base(options)
     {

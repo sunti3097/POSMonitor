@@ -1,94 +1,129 @@
 ﻿@page
 @model POSMonitor.Server.Pages.IndexModel
 @{
-    ViewData["Title"] = "แดชบอร์ด";
+    ViewData["Title"] = "Dashboard";
+    var onlineCount = Model.Devices.Count(d => d.Status == POSMonitor.Shared.Enums.DeviceStatus.Online);
 }
 
-<section class="stat-grid">
-    <article class="stat-card">
-        <h3>ทั้งหมด</h3>
-        <p class="value">@Model.TotalDevices</p>
-        <span class="meta">ข้อมูล ณ @Model.GeneratedAt.ToLocalTime().ToString("HH:mm:ss")</span>
-    </article>
-    <article class="stat-card warning">
-        <h3>แจ้งเตือน</h3>
-        <p class="value">@Model.WarningDevices</p>
-        <span class="meta">Degraded / Unknown</span>
-    </article>
-    <article class="stat-card danger">
-        <h3>Offline</h3>
-        <p class="value">@Model.OfflineDevices</p>
-        <span class="meta">ต้องตรวจสอบทันที</span>
-    </article>
-</section>
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+            อุปกรณ์ทั้งหมด
+        </div>
+        <div class="stat-value">@Model.TotalDevices</div>
+        <div class="stat-sub">อัปเดต @Model.GeneratedAt.ToLocalTime().ToString("HH:mm:ss")</div>
+    </div>
 
-<div class="grid-two">
-    <section>
-        <header class="section-head">
-            <div>
-                <h2>สรุปตามกลุ่ม</h2>
-                <p>ภาพรวมการออนไลน์ในแต่ละกลุ่ม POS</p>
-            </div>
-        </header>
-        <table class="pos-table">
-            <thead>
-                <tr>
-                    <th>กลุ่ม</th>
-                    <th class="text-center">อุปกรณ์</th>
-                    <th class="text-center">Offline</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var group in Model.GroupBreakdown)
-            {
-                <tr>
-                    <td>@group.Name</td>
-                    <td class="text-center">@group.Total</td>
-                    <td class="text-center @(group.Offline > 0 ? "danger-text" : string.Empty)">@group.Offline</td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </section>
+    <div class="stat-card success">
+        <div class="stat-label">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+            ออนไลน์
+        </div>
+        <div class="stat-value">@onlineCount</div>
+        <div class="stat-sub">เชื่อมต่อปกติ</div>
+    </div>
 
-    <section>
-        <header class="section-head">
+    <div class="stat-card warning">
+        <div class="stat-label">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/></svg>
+            แจ้งเตือน
+        </div>
+        <div class="stat-value">@Model.WarningDevices</div>
+        <div class="stat-sub">Degraded / Unknown</div>
+    </div>
+
+    <div class="stat-card danger">
+        <div class="stat-label">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/></svg>
+            Offline
+        </div>
+        <div class="stat-value">@Model.OfflineDevices</div>
+        <div class="stat-sub">ต้องตรวจสอบทันที</div>
+    </div>
+</div>
+
+<div class="dash-grid">
+    <div class="panel">
+        <div class="panel-header">
             <div>
-                <h2>สถานะระบบ</h2>
-                <p>อุปกรณ์เรียงตามชื่อโฮสต์</p>
+                <div class="panel-title">สรุปตามกลุ่ม</div>
+                <div class="panel-sub">ภาพรวมออนไลน์ในแต่ละกลุ่ม POS</div>
             </div>
-        </header>
-        <table class="pos-table compact">
-            <thead>
-                <tr>
-                    <th>เครื่อง</th>
-                    <th>IP</th>
-                    <th>กลุ่ม</th>
-                    <th>สถานะ</th>
-                    <th>ล่าสุด</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var device in Model.Devices)
-            {
-                <tr>
-                    <td>
-                        <strong>@device.Hostname</strong>
-                        <small>@device.DeviceId</small>
-                    </td>
-                    <td>@device.IpAddress</td>
-                    <td>@(device.GroupName ?? "-")</td>
-                    <td>
-                        <span class="badge @device.Status.ToString().ToLower()">
-                            @device.Status
-                        </span>
-                    </td>
-                    <td>
-                        @(device.LastHeartbeatAt?.ToLocalTime().ToString("dd/MM HH:mm") ?? "ไม่เคย")
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </section>
+        </div>
+        <div class="panel-body">
+            <table class="pos-table">
+                <thead>
+                    <tr>
+                        <th>กลุ่ม</th>
+                        <th class="text-center">อุปกรณ์</th>
+                        <th class="text-center">Offline</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (!Model.GroupBreakdown.Any())
+                {
+                    <tr><td colspan="3" style="text-align:center;color:var(--text-sub);padding:24px">ยังไม่มีการจัดกลุ่ม</td></tr>
+                }
+                @foreach (var group in Model.GroupBreakdown)
+                {
+                    <tr>
+                        <td>@group.Name</td>
+                        <td class="text-center">@group.Total</td>
+                        <td class="text-center @(group.Offline > 0 ? "danger-text" : string.Empty)">@group.Offline</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <div>
+                <div class="panel-title">สถานะอุปกรณ์ทั้งหมด</div>
+                <div class="panel-sub">@Model.TotalDevices เครื่อง — อัปเดต @Model.GeneratedAt.ToLocalTime().ToString("HH:mm:ss")</div>
+            </div>
+            <a href="javascript:location.reload()" class="btn-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z" clip-rule="evenodd"/></svg>
+                รีเฟรช
+            </a>
+        </div>
+        <div class="panel-body">
+            <table class="pos-table">
+                <thead>
+                    <tr>
+                        <th>เครื่อง / ID</th>
+                        <th>IP Address</th>
+                        <th>กลุ่ม</th>
+                        <th>สถานะ</th>
+                        <th>Heartbeat ล่าสุด</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (!Model.Devices.Any())
+                {
+                    <tr><td colspan="5" style="text-align:center;color:var(--text-sub);padding:32px">ยังไม่มีอุปกรณ์ที่ลงทะเบียน</td></tr>
+                }
+                @foreach (var device in Model.Devices)
+                {
+                    <tr>
+                        <td>
+                            <div class="device-name">@(string.IsNullOrWhiteSpace(device.Hostname) ? device.DeviceId : device.Hostname)</div>
+                            <div class="device-id">@device.DeviceId</div>
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(device.IpAddress) ? "—" : device.IpAddress)</td>
+                        <td>@(device.GroupName ?? "—")</td>
+                        <td>
+                            <span class="badge @device.Status.ToString().ToLower()">
+                                @device.Status
+                            </span>
+                        </td>
+                        <td>@(device.LastHeartbeatAt?.ToLocalTime().ToString("dd/MM/yy HH:mm") ?? "ไม่เคย")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

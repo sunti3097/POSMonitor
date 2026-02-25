@@ -10,5 +10,6 @@ public class AgentOptions
     public string ApiKey { get; set; } = string.Empty;
     public int HeartbeatIntervalSeconds { get; set; } = 300;
     public string SqlExpressConnectionString { get; set; } = string.Empty;
+    public string? SqlPasswordEncrypted { get; set; }
     public string ServiceName { get; set; } = "POSMonitorAgent";
 }

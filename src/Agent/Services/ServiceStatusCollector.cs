@@ -23,18 +23,18 @@ public class ServiceStatusCollector
         {
             try
             {
-                using var controller = new ServiceController(target.Name);
+                using var controller = new ServiceController(target.ServiceName);
                 var isRunning = controller.Status == ServiceControllerStatus.Running;
                 statuses.Add(new ServiceStatusDto(
-                    target.DisplayName ?? target.Name,
+                    target.DisplayName ?? target.ServiceName,
                     isRunning,
                     controller.ServiceType.ToString(),
                     null));
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Unable to query service {Service}", target.Name);
-                statuses.Add(new ServiceStatusDto(target.Name, false, "Unknown", null));
+                _logger.LogWarning(ex, "Unable to query service {Service}", target.ServiceName);
+                statuses.Add(new ServiceStatusDto(target.ServiceName, false, "Unknown", null));
             }
         }
 

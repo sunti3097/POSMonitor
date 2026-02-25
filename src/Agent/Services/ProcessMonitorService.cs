@@ -23,16 +23,28 @@ public class ProcessMonitorService
 
         foreach (var target in _options.Processes)
         {
-            var processName = Path.GetFileNameWithoutExtension(target.Name);
+            var processName = Path.GetFileNameWithoutExtension(target.ProcessName);
             if (string.IsNullOrWhiteSpace(processName))
             {
-                processName = Path.GetFileNameWithoutExtension(target.Path);
+                processName = Path.GetFileNameWithoutExtension(target.ExecutablePath);
             }
 
             var runningProcess = Process.GetProcessesByName(processName).FirstOrDefault();
-            var isRunning = runningProcess != null && !runningProcess.HasExited;
+            bool isRunning = false;
             DateTimeOffset? lastStart = null;
             double? memoryMb = null;
+
+            if (runningProcess != null)
+            {
+                try
+                {
+                    isRunning = !runningProcess.HasExited;
+                }
+                catch
+                {
+                    isRunning = true;
+                }
+            }
 
             if (isRunning)
             {
@@ -43,31 +55,31 @@ public class ProcessMonitorService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(ex, "Unable to read metrics for process {Process}", target.Name);
+                    _logger.LogDebug(ex, "Unable to read metrics for process {Process}", target.ProcessName);
                 }
             }
-            else if (target.AutoRestart && File.Exists(target.Path))
+            else if (target.AutoRestart && File.Exists(target.ExecutablePath))
             {
                 try
                 {
                     Process.Start(new ProcessStartInfo
                     {
-                        FileName = target.Path,
-                        WorkingDirectory = Path.GetDirectoryName(target.Path),
+                        FileName = target.ExecutablePath,
+                        WorkingDirectory = Path.GetDirectoryName(target.ExecutablePath),
                         UseShellExecute = true
                     });
                     isRunning = true;
-                    _logger.LogInformation("Auto-started process {Process}", target.Name);
+                    _logger.LogInformation("Auto-started process {Process}", target.ProcessName);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to start process {Process}", target.Name);
+                    _logger.LogError(ex, "Failed to start process {Process}", target.ProcessName);
                 }
             }
 
             processes.Add(new TrackedProcessDto(
-                target.Name,
-                target.Path,
+                target.DisplayName ?? target.ProcessName,
+                target.ExecutablePath,
                 isRunning,
                 null,
                 memoryMb,

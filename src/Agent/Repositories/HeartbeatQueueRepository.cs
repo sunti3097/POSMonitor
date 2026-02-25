@@ -1,6 +1,7 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 using POSMonitor.Agent.Options;
+using POSMonitor.Agent.Security;
 using POSMonitor.Shared.Contracts.Requests;
 using System.Text.Json;
 
@@ -22,9 +23,27 @@ END";
 
     public HeartbeatQueueRepository(IOptions<AgentOptions> options, ILogger<HeartbeatQueueRepository> logger)
     {
-        _connectionString = options.Value.SqlExpressConnectionString;
+        _connectionString = BuildConnectionString(options.Value);
         _logger = logger;
         Initialize().GetAwaiter().GetResult();
+    }
+
+    private static string BuildConnectionString(AgentOptions options)
+    {
+        if (!string.IsNullOrWhiteSpace(options.SqlPasswordEncrypted))
+        {
+            var builder = new SqlConnectionStringBuilder(options.SqlExpressConnectionString);
+            builder.Password = SecretProtector.Decrypt(options.SqlPasswordEncrypted);
+            builder.Encrypt = false;
+            return builder.ToString();
+        }
+
+        var defaultBuilder = new SqlConnectionStringBuilder(options.SqlExpressConnectionString)
+        {
+            Encrypt = false
+        };
+
+        return defaultBuilder.ToString();
     }
 
     private async Task Initialize()
