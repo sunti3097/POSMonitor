@@ -1,154 +1,324 @@
 @page "/Groups"
 @model POSMonitor.Server.Pages.Groups.IndexModel
+@using POSMonitor.Shared.Enums
 @{
     ViewData["Title"] = "กลุ่มอุปกรณ์";
+    var totalGroups = Model.CompanyGroups.Sum(c => c.Stores.Count);
+    var totalDevices = Model.CompanyGroups.Sum(c => c.TotalDevices);
 }
 
 <div class="page-header">
     <h2 class="page-subtitle">จัดการกลุ่มอุปกรณ์</h2>
-    <p class="page-description">สร้างและจัดการกลุ่ม POS ตามบริษัทและสาขา</p>
+    <p class="page-description">จัดกลุ่ม POS ตามบริษัทและสาขา — @Model.CompanyGroups.Count บริษัท / @totalGroups สาขา / @totalDevices เครื่อง</p>
 </div>
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success">@TempData["Success"]</div>
+    <div class="alert alert-success">✅ @TempData["Success"]</div>
 }
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">@TempData["Error"]</div>
+    <div class="alert alert-danger">⚠️ @TempData["Error"]</div>
 }
 
+<!-- Create Group Form -->
 <div class="panel">
     <div class="panel-header">
-        <h3 class="panel-title">สร้างกลุ่มใหม่</h3>
+        <h3 class="panel-title">➕ เพิ่มสาขาใหม่</h3>
     </div>
     <div class="panel-body">
-        <form method="post" asp-page-handler="Create" class="form-inline">
-            <div class="form-group">
-                <label>ชื่อกลุ่ม</label>
-                <input type="text" asp-for="NewGroupName" class="form-control" placeholder="เช่น Discovery Retail" required />
+        <form method="post" asp-page-handler="Create" id="createForm">
+            <div class="create-grid">
+                <div class="form-group">
+                    <label>รหัสบริษัท <span class="req">*</span></label>
+                    <input type="text" asp-for="NewCompanyCode" class="form-control" placeholder="เช่น 204" required />
+                    <small class="hint">รหัสตัวเลข/ตัวอักษรของบริษัท</small>
+                </div>
+                <div class="form-group">
+                    <label>รหัสสาขา / ชื่อสาขา <span class="req">*</span></label>
+                    <input type="text" asp-for="NewStoreCode" class="form-control" placeholder="เช่น BangNa-01" required />
+                    <small class="hint">ชื่อหรือรหัสสาขา</small>
+                </div>
+                <div class="form-group">
+                    <label>คำอธิบาย</label>
+                    <input type="text" asp-for="NewGroupDescription" class="form-control" placeholder="หมายเหตุเพิ่มเติม (ไม่บังคับ)" />
+                </div>
             </div>
-            <div class="form-group">
-                <label>รหัสบริษัท</label>
-                <input type="text" asp-for="NewGroupCompanyCode" class="form-control" placeholder="เช่น 204" />
+
+            <!-- Device Picker -->
+            <div class="device-picker-section">
+                <div class="device-picker-header">
+                    <span class="device-picker-title">🖥️ เลือกเครื่อง POS เข้ากลุ่ม</span>
+                    <span class="selected-count" id="selectedCount">ยังไม่เลือก</span>
+                </div>
+                @if (!Model.AllDevices.Any())
+                {
+                    <div class="no-devices">ยังไม่มีเครื่อง POS ในระบบ (เครื่องจะปรากฏหลัง Agent ส่ง heartbeat)</div>
+                }
+                else
+                {
+                    <div class="search-picker">
+                        <input type="text" id="deviceSearch" placeholder="ค้นหาเครื่อง..." class="form-control-sm" />
+                    </div>
+                    <div class="device-grid" id="deviceGrid">
+                        @foreach (var device in Model.AllDevices)
+                        {
+                            var statusCls = device.Status.ToString().ToLower();
+                            var isUnassigned = Model.UnassignedDevices.Any(u => u.Id == device.Id);
+                            <label class="device-chip @statusCls @(isUnassigned ? "" : "assigned")"
+                                   data-search="@device.DeviceId @device.Hostname @device.IpAddress @device.StoreCode @device.CompanyCode">
+                                <input type="checkbox" name="SelectedDeviceIds" value="@device.Id"
+                                       onchange="updateCount()" @(isUnassigned ? "" : "") />
+                                <span class="chip-dot @statusCls"></span>
+                                <span class="chip-id">@device.DeviceId</span>
+                                @if (!string.IsNullOrEmpty(device.Hostname))
+                                {
+                                    <span class="chip-host">@device.Hostname</span>
+                                }
+                                @if (!isUnassigned)
+                                {
+                                    <span class="chip-assigned">มีกลุ่มแล้ว</span>
+                                }
+                            </label>
+                        }
+                    </div>
+                }
             </div>
-            <div class="form-group">
-                <label>คำอธิบาย</label>
-                <input type="text" asp-for="NewGroupDescription" class="form-control" placeholder="คำอธิบายเพิ่มเติม" />
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">สร้างสาขา</button>
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('createForm').reset(); updateCount();">ล้างค่า</button>
             </div>
-            <button type="submit" class="btn btn-primary">สร้างกลุ่ม</button>
         </form>
     </div>
 </div>
 
-<div class="panel">
-    <div class="panel-header">
-        <h3 class="panel-title">รายการกลุ่มทั้งหมด (@Model.Groups.Count)</h3>
-    </div>
-    <div class="panel-body">
-        @if (!Model.Groups.Any())
-        {
+<!-- Groups grouped by Company -> Store -->
+@if (!Model.CompanyGroups.Any())
+{
+    <div class="panel">
+        <div class="panel-body">
             <div class="empty-state">
-                <div class="empty-state-icon">📁</div>
-                <div class="empty-state-title">ยังไม่มีกลุ่ม</div>
-                <p>สร้างกลุ่มแรกของคุณด้านบน</p>
+                <div class="empty-icon">📁</div>
+                <div class="empty-title">ยังไม่มีกลุ่ม</div>
+                <p>เพิ่มสาขาแรกด้านบน</p>
             </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ชื่อกลุ่ม</th>
-                            <th>รหัสบริษัท</th>
-                            <th>คำอธิบาย</th>
-                            <th>จำนวนเครื่อง</th>
-                            <th>สถานะ</th>
-                            <th>จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var group in Model.Groups)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="cell-title">@group.Name</div>
-                                </td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(group.CompanyCode))
-                                    {
-                                        <span class="badge badge-company">@group.CompanyCode</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">-</span>
-                                    }
-                                </td>
-                                <td>@(string.IsNullOrEmpty(group.Description) ? "-" : group.Description)</td>
-                                <td>@group.DeviceCount เครื่อง</td>
-                                <td>
-                                    <div class="status-summary">
-                                        @if (group.OnlineCount > 0)
-                                        {
-                                            <span class="status-pill online">@group.OnlineCount Online</span>
-                                        }
-                                        @if (group.OfflineCount > 0)
-                                        {
-                                            <span class="status-pill offline">@group.OfflineCount Offline</span>
-                                        }
-                                    </div>
-                                </td>
-                                <td>
-                                    <form method="post" asp-page-handler="Delete" asp-route-id="@group.Id" 
-                                          onsubmit="return confirm('ยืนยันการลบกลุ่มนี้?');" style="display:inline">
-                                        <button type="submit" class="btn btn-danger btn-sm">ลบ</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+        </div>
     </div>
-</div>
+}
+else
+{
+    @foreach (var company in Model.CompanyGroups)
+    {
+        <div class="company-section">
+            <div class="company-header">
+                <span class="company-icon">🏢</span>
+                <span class="company-name">บริษัท @company.CompanyCode</span>
+                <span class="company-stat">@company.Stores.Count สาขา</span>
+                <span class="company-stat online">@company.OnlineDevices Online</span>
+                <span class="company-stat offline">@company.OfflineDevices Offline</span>
+            </div>
+
+            <div class="store-grid">
+                @foreach (var store in company.Stores)
+                {
+                    <div class="store-card">
+                        <div class="store-card-header">
+                            <div>
+                                <div class="store-name">📍 @store.StoreCode</div>
+                                @if (!string.IsNullOrEmpty(store.Description))
+                                {
+                                    <div class="store-desc">@store.Description</div>
+                                }
+                            </div>
+                            <div class="store-actions">
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@store.Id"
+                                      onsubmit="return confirm('ลบสาขา @store.StoreCode ?');" style="display:inline">
+                                    <button type="submit" class="btn-icon-danger" title="ลบสาขา">✕</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="store-stats">
+                            <span class="pill-online">@store.OnlineCount Online</span>
+                            <span class="pill-offline">@store.OfflineCount Offline</span>
+                            <span class="pill-total">@store.Devices.Count เครื่อง</span>
+                        </div>
+
+                        @if (store.Devices.Any())
+                        {
+                            <div class="pos-list">
+                                @foreach (var d in store.Devices)
+                                {
+                                    var sc = d.Status.ToString().ToLower();
+                                    <div class="pos-row @sc">
+                                        <span class="pos-dot @sc"></span>
+                                        <span class="pos-id">@d.DeviceId</span>
+                                        <span class="pos-host">@(string.IsNullOrEmpty(d.Hostname) ? d.IpAddress : d.Hostname)</span>
+                                        <span class="pos-time">@(d.LastHeartbeatAt?.ToLocalTime().ToString("HH:mm") ?? "-")</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="pos-empty">ยังไม่มีเครื่อง POS</div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+
+@if (Model.UnassignedDevices.Any())
+{
+    <div class="unassigned-section">
+        <div class="unassigned-header">⚠️ เครื่องที่ยังไม่ได้อยู่ในกลุ่ม (@Model.UnassignedDevices.Count เครื่อง)</div>
+        <div class="unassigned-list">
+            @foreach (var d in Model.UnassignedDevices)
+            {
+                var sc = d.Status.ToString().ToLower();
+                <span class="unassigned-chip @sc">
+                    <span class="pos-dot @sc"></span> @d.DeviceId
+                    @if (!string.IsNullOrEmpty(d.Hostname)) { <span>(@d.Hostname)</span> }
+                </span>
+            }
+        </div>
+    </div>
+}
 
 <style>
-.page-header{margin-bottom:24px}
-.page-subtitle{font-size:1.25rem;font-weight:700;color:var(--text);margin-bottom:4px}
-.page-description{color:var(--text-muted);font-size:0.9rem}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:20px}
-.panel-header{padding:16px 20px;border-bottom:1px solid var(--border)}
-.panel-title{font-size:1rem;font-weight:600;color:var(--text)}
-.panel-body{padding:20px}
-.form-inline{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap}
-.form-group{display:flex;flex-direction:column;gap:6px}
-.form-group label{font-size:0.8rem;font-weight:600;color:var(--text-muted)}
-.form-control{padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:0.9rem;color:var(--text);min-width:200px}
-.btn{padding:10px 20px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
-.btn-primary{background:var(--purple-600);color:white}
-.btn-primary:hover{background:var(--purple-700)}
-.btn-danger{background:var(--danger);color:white}
-.btn-danger:hover{background:#dc2626}
-.btn-sm{padding:6px 12px;font-size:0.8rem}
-.data-table{width:100%;border-collapse:collapse}
-.data-table th{padding:12px 16px;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);background:var(--purple-50);border-bottom:1px solid var(--border)}
-.data-table td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:0.9rem;color:var(--text)}
-.data-table tbody tr:hover{background:var(--purple-50)}
-.cell-title{font-weight:600;color:var(--text)}
-.badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600}
-.badge-company{background:var(--purple-100);color:var(--purple-700)}
-.status-summary{display:flex;gap:8px;flex-wrap:wrap}
-.status-pill{padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:600}
-.status-pill.online{background:#dcfce7;color:#166534}
-.status-pill.offline{background:#fee2e2;color:#991b1b}
-.text-muted{color:var(--text-muted)}
-.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
-.empty-state-icon{font-size:2.5rem;margin-bottom:12px}
-.empty-state-title{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:4px}
-.table-responsive{overflow-x:auto}
-.alert{padding:12px 16px;border-radius:8px;margin-bottom:20px}
+/* Layout */
+.page-header{margin-bottom:20px}
+.page-subtitle{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:4px}
+.page-description{color:var(--text-muted);font-size:0.85rem}
+.alert{padding:10px 16px;border-radius:8px;margin-bottom:16px;font-size:0.9rem}
 .alert-success{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}
 .alert-danger{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+
+/* Panel */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:20px}
+.panel-header{padding:14px 20px;border-bottom:1px solid var(--border)}
+.panel-title{font-size:0.95rem;font-weight:600;color:var(--text);margin:0}
+.panel-body{padding:20px}
+
+/* Create Form */
+.create-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+@@media(max-width:800px){.create-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:0.78rem;font-weight:600;color:var(--text-muted)}
+.req{color:#ef4444}
+.hint{font-size:0.72rem;color:var(--text-muted)}
+.form-control{padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:0.88rem;color:var(--text)}
+.form-control:focus{border-color:var(--purple-400);outline:none;box-shadow:0 0 0 3px var(--purple-100)}
+.form-control-sm{padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:0.82rem;color:var(--text);width:100%;margin-bottom:10px}
+.form-actions{display:flex;gap:12px;margin-top:20px}
+.btn{padding:9px 20px;border-radius:8px;font-size:0.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:var(--purple-600);color:white}
+.btn-primary:hover{background:var(--purple-700)}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--purple-50)}
+
+/* Device Picker */
+.device-picker-section{border:1px solid var(--border);border-radius:10px;padding:14px}
+.device-picker-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.device-picker-title{font-size:0.85rem;font-weight:600;color:var(--text)}
+.selected-count{font-size:0.78rem;font-weight:600;color:var(--purple-600);background:var(--purple-50);padding:3px 10px;border-radius:12px}
+.no-devices{text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem}
+.search-picker{margin-bottom:10px}
+.device-grid{display:flex;flex-wrap:wrap;gap:8px;max-height:220px;overflow-y:auto;padding:4px}
+.device-chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.8rem;background:var(--bg);transition:all .15s;user-select:none}
+.device-chip:hover{border-color:var(--purple-400);background:var(--purple-50)}
+.device-chip input{display:none}
+.device-chip.selected{border-color:var(--purple-500);background:var(--purple-50)}
+.device-chip.assigned{opacity:0.55;border-style:dashed}
+.device-chip.online{border-color:#bbf7d0}
+.device-chip.offline{border-color:#fecaca}
+.chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.chip-dot.online{background:#16a34a}
+.chip-dot.offline{background:#dc2626}
+.chip-dot.unknown,.chip-dot.degraded{background:#f59e0b}
+.chip-id{font-weight:700;color:var(--text)}
+.chip-host{color:var(--text-muted);font-size:0.72rem}
+.chip-assigned{font-size:0.68rem;color:#f59e0b;background:#fef3c7;padding:1px 5px;border-radius:4px}
+
+/* Company Section */
+.company-section{margin-bottom:28px}
+.company-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--purple-50);border-radius:10px;border-left:4px solid var(--purple-500)}
+.company-icon{font-size:1.1rem}
+.company-name{font-size:1rem;font-weight:700;color:var(--text);flex:1}
+.company-stat{font-size:0.78rem;font-weight:600;padding:3px 10px;border-radius:12px;background:white;color:var(--text-muted)}
+.company-stat.online{color:#166534;background:#dcfce7}
+.company-stat.offline{color:#991b1b;background:#fee2e2}
+
+/* Store Grid */
+.store-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.store-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.store-card-header{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 14px 8px;border-bottom:1px solid var(--border)}
+.store-name{font-size:0.9rem;font-weight:700;color:var(--text)}
+.store-desc{font-size:0.75rem;color:var(--text-muted);margin-top:2px}
+.store-actions{display:flex;gap:6px}
+.btn-icon-danger{background:none;border:none;cursor:pointer;color:#ef4444;font-size:1rem;padding:2px 6px;border-radius:6px;line-height:1}
+.btn-icon-danger:hover{background:#fee2e2}
+.store-stats{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border)}
+.pill-online{font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:12px;background:#dcfce7;color:#166534}
+.pill-offline{font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:12px;background:#fee2e2;color:#991b1b}
+.pill-total{font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:12px;background:var(--purple-50);color:var(--purple-700)}
+
+/* POS List inside store card */
+.pos-list{padding:8px 14px;display:flex;flex-direction:column;gap:4px}
+.pos-row{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:6px;font-size:0.8rem}
+.pos-row.online{background:#f0fdf4}
+.pos-row.offline{background:#fff1f2}
+.pos-row.unknown,.pos-row.degraded{background:#fffbeb}
+.pos-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pos-dot.online{background:#16a34a}
+.pos-dot.offline{background:#dc2626}
+.pos-dot.unknown,.pos-dot.degraded{background:#f59e0b}
+.pos-id{font-weight:700;color:var(--text);font-family:monospace;min-width:70px}
+.pos-host{flex:1;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pos-time{font-size:0.7rem;color:var(--text-muted);flex-shrink:0}
+.pos-empty{padding:12px 14px;color:var(--text-muted);font-size:0.8rem;text-align:center}
+
+/* Empty & Unassigned */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
+.empty-icon{font-size:2.5rem;margin-bottom:10px}
+.empty-title{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:6px}
+.unassigned-section{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-top:4px}
+.unassigned-header{font-size:0.85rem;font-weight:600;color:#92400e;margin-bottom:10px}
+.unassigned-list{display:flex;flex-wrap:wrap;gap:8px}
+.unassigned-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:0.78rem;font-weight:500;border:1px solid #fde68a;background:white;color:var(--text)}
 </style>
+
+<script>
+    function updateCount() {
+        const checked = document.querySelectorAll('#createForm input[name="SelectedDeviceIds"]:checked');
+        const el = document.getElementById('selectedCount');
+        el.textContent = checked.length > 0 ? `เลือก ${checked.length} เครื่อง` : 'ยังไม่เลือก';
+        document.querySelectorAll('.device-chip').forEach(chip => {
+            const cb = chip.querySelector('input[type="checkbox"]');
+            chip.classList.toggle('selected', cb && cb.checked);
+        });
+    }
+
+    document.getElementById('deviceSearch')?.addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        document.querySelectorAll('.device-chip').forEach(chip => {
+            const text = (chip.dataset.search || chip.textContent).toLowerCase();
+            chip.style.display = text.includes(q) ? '' : 'none';
+        });
+    });
+
+    // Make whole chip label toggle checkbox
+    document.querySelectorAll('.device-chip').forEach(chip => {
+        chip.addEventListener('click', function (e) {
+            if (e.target.tagName !== 'INPUT') {
+                const cb = this.querySelector('input[type="checkbox"]');
+                if (cb) { cb.checked = !cb.checked; updateCount(); }
+                e.preventDefault();
+            }
+        });
+    });
+    updateCount();
+</script>
