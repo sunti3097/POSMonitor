@@ -101,28 +101,33 @@ button{cursor:pointer;font-family:inherit;border:none;background:none}
 .group-count{font-size:0.8rem;color:var(--text-sub);background:var(--surface);padding:4px 10px;border-radius:8px;border:1px solid var(--border)}
 .machine-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
 .machine-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all 0.3s;position:relative;overflow:hidden}
-.machine-card:hover{border-color:var(--purple-300);box-shadow:0 8px 32px rgba(124,58,237,0.1);transform:translateY(-2px)}
-.machine-card.offline{border-color:var(--danger);background:linear-gradient(135deg,var(--surface) 0%,var(--danger-light) 100%)}
-.machine-card.warning{border-color:var(--warning);background:linear-gradient(135deg,var(--surface) 0%,var(--warning-light) 100%)}
-.machine-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
-.machine-id{font-size:0.9rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
-.status-badge{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:8px;font-size:0.75rem;font-weight:700;text-transform:uppercase}
-.status-badge.online{background:var(--success-light);color:var(--success)}
-.status-badge.offline{background:var(--danger-light);color:var(--danger)}
-.status-dot{width:6px;height:6px;border-radius:50%}
-.status-badge.online .status-dot{background:var(--success)}
-.status-badge.offline .status-dot{background:var(--danger)}
-.machine-info{margin-bottom:16px}
-.machine-label{font-size:0.8rem;color:var(--text-muted);margin-bottom:2px}
-.machine-value{font-size:0.85rem;font-weight:600;color:var(--text)}
-.machine-metrics{display:flex;flex-direction:column;gap:10px}
-.metric-row{display:flex;align-items:center;justify-content:space-between;font-size:0.8rem}
+.machine-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px)}
+.machine-card.online{background:#f0fdf4;border-color:#22c55e}
+.machine-card.warning{background:#fffbeb;border-color:#f59e0b}
+.machine-card.offline{background:#fef2f2;border-color:#ef4444}
+.machine-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.machine-id{font-weight:700;color:var(--purple-700);font-size:0.85rem}
+.machine-card.offline .machine-id{color:#dc2626}
+.machine-card.online .machine-id{color:#16a34a}
+.machine-info{margin-bottom:10px}
+.machine-label{font-size:0.7rem;color:var(--text-muted);margin-bottom:2px}
+.machine-value{font-size:0.8rem;font-weight:600;color:var(--text)}
+.machine-card.online .machine-value{color:#16a34a}
+.machine-card.offline .machine-value{color:#dc2626}
+.machine-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.metric-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;font-size:0.75rem}
 .metric-label{color:var(--text-muted);font-weight:500}
 .metric-value{font-weight:700;color:var(--text)}
-.metric-bar{height:6px;background:var(--border-light);border-radius:3px;overflow:hidden;margin-top:4px}
-.metric-bar-fill{height:100%;border-radius:3px;transition:width 0.3s}
-.metric-bar-fill.cpu{background:linear-gradient(90deg,var(--purple-400),var(--purple-600))}
-.metric-bar-fill.ram{background:linear-gradient(90deg,var(--gold-400),var(--gold-600))}
+.machine-card.online .metric-value{color:#16a34a}
+.machine-card.offline .metric-value{color:#dc2626}
+.metric-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.metric-bar-fill.cpu{background:#8b5cf6}
+.metric-bar-fill.ram{background:#06b6d4}
+.machine-card.online .metric-bar-fill.cpu{background:#22c55e}
+.machine-card.online .metric-bar-fill.ram{background:#22c55e}
+.machine-card.offline .metric-bar-fill.cpu{background:#ef4444}
+.machine-card.offline .metric-bar-fill.ram{background:#ef4444}
 .machine-table-container{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
 .machine-table{width:100%;border-collapse:collapse}
 .machine-table th{background:var(--purple-50);padding:14px 20px;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--purple-700);border-bottom:1px solid var(--purple-200)}

@@ -16,6 +16,8 @@ public class Device
     public string LastProcessesJson { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public string? CompanyCode { get; set; }
+    public string? StoreCode { get; set; }
 
     public ICollection<Heartbeat> Heartbeats { get; set; } = new List<Heartbeat>();
     public ICollection<Command> Commands { get; set; } = new List<Command>();

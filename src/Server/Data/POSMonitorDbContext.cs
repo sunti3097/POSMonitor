@@ -25,9 +25,13 @@ public class POSMonitorDbContext : IdentityDbContext<AppUser>
         {
             entity.HasKey(x => x.Id);
             entity.HasIndex(x => x.DeviceId).IsUnique();
+            entity.HasIndex(x => x.CompanyCode);
+            entity.HasIndex(x => x.StoreCode);
             entity.Property(x => x.DeviceId).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Hostname).HasMaxLength(200);
             entity.Property(x => x.IpAddress).HasMaxLength(60);
+            entity.Property(x => x.CompanyCode).HasMaxLength(50);
+            entity.Property(x => x.StoreCode).HasMaxLength(100);
             entity.Property(x => x.LastHardwareSnapshotJson).HasColumnType("nvarchar(max)");
             entity.Property(x => x.LastServicesJson).HasColumnType("nvarchar(max)");
             entity.Property(x => x.LastProcessesJson).HasColumnType("nvarchar(max)");
