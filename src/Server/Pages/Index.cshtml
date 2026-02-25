@@ -1,0 +1,94 @@
+﻿@page
+@model POSMonitor.Server.Pages.IndexModel
+@{
+    ViewData["Title"] = "แดชบอร์ด";
+}
+
+<section class="stat-grid">
+    <article class="stat-card">
+        <h3>ทั้งหมด</h3>
+        <p class="value">@Model.TotalDevices</p>
+        <span class="meta">ข้อมูล ณ @Model.GeneratedAt.ToLocalTime().ToString("HH:mm:ss")</span>
+    </article>
+    <article class="stat-card warning">
+        <h3>แจ้งเตือน</h3>
+        <p class="value">@Model.WarningDevices</p>
+        <span class="meta">Degraded / Unknown</span>
+    </article>
+    <article class="stat-card danger">
+        <h3>Offline</h3>
+        <p class="value">@Model.OfflineDevices</p>
+        <span class="meta">ต้องตรวจสอบทันที</span>
+    </article>
+</section>
+
+<div class="grid-two">
+    <section>
+        <header class="section-head">
+            <div>
+                <h2>สรุปตามกลุ่ม</h2>
+                <p>ภาพรวมการออนไลน์ในแต่ละกลุ่ม POS</p>
+            </div>
+        </header>
+        <table class="pos-table">
+            <thead>
+                <tr>
+                    <th>กลุ่ม</th>
+                    <th class="text-center">อุปกรณ์</th>
+                    <th class="text-center">Offline</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var group in Model.GroupBreakdown)
+            {
+                <tr>
+                    <td>@group.Name</td>
+                    <td class="text-center">@group.Total</td>
+                    <td class="text-center @(group.Offline > 0 ? "danger-text" : string.Empty)">@group.Offline</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <header class="section-head">
+            <div>
+                <h2>สถานะระบบ</h2>
+                <p>อุปกรณ์เรียงตามชื่อโฮสต์</p>
+            </div>
+        </header>
+        <table class="pos-table compact">
+            <thead>
+                <tr>
+                    <th>เครื่อง</th>
+                    <th>IP</th>
+                    <th>กลุ่ม</th>
+                    <th>สถานะ</th>
+                    <th>ล่าสุด</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var device in Model.Devices)
+            {
+                <tr>
+                    <td>
+                        <strong>@device.Hostname</strong>
+                        <small>@device.DeviceId</small>
+                    </td>
+                    <td>@device.IpAddress</td>
+                    <td>@(device.GroupName ?? "-")</td>
+                    <td>
+                        <span class="badge @device.Status.ToString().ToLower()">
+                            @device.Status
+                        </span>
+                    </td>
+                    <td>
+                        @(device.LastHeartbeatAt?.ToLocalTime().ToString("dd/MM HH:mm") ?? "ไม่เคย")
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </section>
+</div>

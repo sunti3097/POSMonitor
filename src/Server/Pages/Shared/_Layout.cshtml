@@ -1,0 +1,52 @@
+@inject Microsoft.Extensions.Options.IOptions<POSMonitor.Server.Options.MonitoringOptions> MonitoringOptions
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - POS Monitor</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="dot"></span>
+                <div>
+                    <div class="brand-title">POS Monitor</div>
+                    <div class="brand-sub">Insight & Health</div>
+                </div>
+            </div>
+            <nav>
+                <a class="nav-link" asp-page="/Index">
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-link" asp-page="/Dashboard/Groups">
+                    <span>กลุ่มอุปกรณ์</span>
+                </a>
+                <a class="nav-link" asp-page="/Dashboard/Notifications">
+                    <span>แจ้งเตือน</span>
+                </a>
+            </nav>
+        </aside>
+        <main>
+            <header class="page-header">
+                <div>
+                    <h1>@ViewData["Title"]</h1>
+                    <p class="subtitle">ติดตามสถานะเครื่อง POS ทั้งหมดแบบ real-time</p>
+                </div>
+                <div class="meta">
+                    <span>Offline threshold: @MonitoringOptions.Value.OfflineThresholdMinutes นาที</span>
+                    <span>Heartbeat retention: @MonitoringOptions.Value.HeartbeatRetentionDays วัน</span>
+                </div>
+            </header>
+            <section class="content">
+                @RenderBody()
+            </section>
+        </main>
+    </div>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

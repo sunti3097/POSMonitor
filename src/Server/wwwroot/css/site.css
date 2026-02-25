@@ -1,0 +1,256 @@
+:root {
+    --bg: #f4f1fb;
+    --panel: #ffffff;
+    --accent: #b084f6;
+    --accent-dark: #8051c4;
+    --gold: #d8a84f;
+    --text: #1f1d2b;
+    --muted: #7a6d92;
+    --danger: #e05c6f;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Prompt', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.app-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: linear-gradient(180deg, #140a2f, #1f1242);
+    color: white;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.brand .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--gold);
+    box-shadow: 0 0 10px rgba(216, 168, 79, 0.8);
+}
+
+.brand-title {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.brand-sub {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.nav-link {
+    display: block;
+    padding: 12px 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+.nav-link + .nav-link {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+main {
+    padding: 32px 40px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    margin-bottom: 6px;
+}
+
+.subtitle {
+    color: var(--muted);
+}
+
+.meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--panel);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(20, 10, 47, 0.08);
+}
+
+.stat-card h3 {
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+
+.stat-card .value {
+    font-size: 2.4rem;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+.stat-card.warning {
+    border-left: 4px solid var(--gold);
+}
+
+.stat-card.danger {
+    border-left: 4px solid var(--danger);
+}
+
+.stat-card .meta {
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.grid-two {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 24px;
+}
+
+section {
+    background: var(--panel);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(20, 10, 47, 0.07);
+}
+
+.section-head h2 {
+    font-size: 1.2rem;
+    margin-bottom: 6px;
+}
+
+.section-head p {
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.pos-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+}
+
+.pos-table th,
+.pos-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #efeafa;
+}
+
+.pos-table th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+}
+
+.pos-table .text-center {
+    text-align: center;
+}
+
+.pos-table.compact td {
+    padding: 10px 8px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.badge.online {
+    background: rgba(176, 132, 246, 0.18);
+    color: var(--accent-dark);
+}
+
+.badge.offline {
+    background: rgba(224, 92, 111, 0.15);
+    color: var(--danger);
+}
+
+.badge.degraded,
+.badge.unknown {
+    background: rgba(216, 168, 79, 0.15);
+    color: var(--gold);
+}
+
+.danger-text {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+small {
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+@media (max-width: 960px) {
+    .app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    main {
+        padding: 24px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

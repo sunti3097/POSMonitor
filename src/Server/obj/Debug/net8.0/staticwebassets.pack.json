@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\POSMonitor\\src\\Server\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.POSMonitor.Server.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.POSMonitor.Server.props",
+      "PackagePath": "build\\POSMonitor.Server.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.POSMonitor.Server.props",
+      "PackagePath": "buildMultiTargeting\\POSMonitor.Server.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.POSMonitor.Server.props",
+      "PackagePath": "buildTransitive\\POSMonitor.Server.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "",
+"RedirectUrl": "",
+"LaunchCommand": "",
+"WorkingDirectory": "C:\\POSMonitor\\src\\Server",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}

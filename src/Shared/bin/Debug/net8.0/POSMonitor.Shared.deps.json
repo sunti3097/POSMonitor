@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "POSMonitor.Shared/1.0.0": {
+        "runtime": {
+          "POSMonitor.Shared.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "POSMonitor.Shared/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
