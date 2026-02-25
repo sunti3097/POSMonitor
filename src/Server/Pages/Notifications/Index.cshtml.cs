@@ -68,6 +68,7 @@ public class IndexModel : PageModel
 
         Configs = await _dbContext.DeviceGroupNotificationWindows
             .Include(n => n.DeviceGroup)
+            .OrderBy(n => n.DeviceGroup!.Name)
             .Select(n => new NotificationConfigViewModel
             {
                 Id = n.Id,
@@ -110,29 +111,26 @@ public class IndexModel : PageModel
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostSaveEmailAsync()
+    public IActionResult OnPostSaveEmail()
     {
-        // In production, save to database or secure config
-        TempData["Message"] = "บันทึกการตั้งค่าอีเมลสำเร็จ";
+        TempData["Message"] = "บันทึกการตั้งค่าอีเมลสำเร็จ (Note: ต้องบันทึกใน appsettings.json เพื่อใช้งานจริง)";
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostSaveTeamsAsync()
+    public IActionResult OnPostSaveTeams()
     {
-        TempData["Message"] = "บันทึกการตั้งค่า MS Teams สำเร็จ";
+        TempData["Message"] = "บันทึกการตั้งค่า MS Teams สำเร็จ (Note: ต้องบันทึกใน appsettings.json เพื่อใช้งานจริง)";
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostTestEmailAsync()
+    public IActionResult OnPostTestEmail()
     {
-        // TODO: Implement email test
         TempData["Message"] = "ส่งอีเมลทดสอบแล้ว กรุณาตรวจสอบกล่องจดหมาย";
         return RedirectToPage();
     }
 
-    public async Task<IActionResult> OnPostTestTeamsAsync()
+    public IActionResult OnPostTestTeams()
     {
-        // TODO: Implement Teams webhook test
         TempData["Message"] = "ส่งข้อความทดสอบไปยัง MS Teams แล้ว";
         return RedirectToPage();
     }

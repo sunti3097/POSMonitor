@@ -12,5 +12,7 @@ public record DeviceSummaryDto(
     [property: JsonPropertyName("networkStatus")] NetworkStatus NetworkStatus,
     [property: JsonPropertyName("lastHeartbeatAt")] DateTimeOffset? LastHeartbeatAt,
     [property: JsonPropertyName("groupId")] Guid? GroupId,
-    [property: JsonPropertyName("groupName")] string? GroupName
+    [property: JsonPropertyName("groupName")] string? GroupName,
+    [property: JsonPropertyName("companyCode")] string? CompanyCode,
+    [property: JsonPropertyName("storeCode")] string? StoreCode
 );

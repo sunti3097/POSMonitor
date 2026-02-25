@@ -85,7 +85,7 @@ static async Task SeedAdminAsync(WebApplication app)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    foreach (var role in new[] { "Admin", "Operator", "Viewer" })
+    foreach (var role in new[] { "Admin", "Operator", "Viewer", "User" })
     {
         if (!await roleManager.RoleExistsAsync(role))
             await roleManager.CreateAsync(new IdentityRole(role));

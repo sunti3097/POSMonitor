@@ -58,17 +58,26 @@ public class IndexModel : PageModel
 
     public async Task<IActionResult> OnPostCreateAsync()
     {
-        if (!string.IsNullOrWhiteSpace(NewGroupName))
+        if (string.IsNullOrWhiteSpace(NewGroupName))
         {
-            var group = new DeviceGroup
-            {
-                Name = NewGroupName.Trim(),
-                Description = NewGroupDescription?.Trim(),
-                CompanyCode = NewGroupCompanyCode?.Trim()
-            };
-            _dbContext.DeviceGroups.Add(group);
-            await _dbContext.SaveChangesAsync();
+            TempData["Error"] = "กรุณาระบุชื่อกลุ่ม";
+            return RedirectToPage();
         }
+        var exists = await _dbContext.DeviceGroups.AnyAsync(g => g.Name == NewGroupName.Trim());
+        if (exists)
+        {
+            TempData["Error"] = $"มีกลุ่มชื่อ '{NewGroupName.Trim()}' อยู่แล้ว";
+            return RedirectToPage();
+        }
+        var group = new DeviceGroup
+        {
+            Name = NewGroupName.Trim(),
+            Description = NewGroupDescription?.Trim(),
+            CompanyCode = NewGroupCompanyCode?.Trim()
+        };
+        _dbContext.DeviceGroups.Add(group);
+        await _dbContext.SaveChangesAsync();
+        TempData["Success"] = $"สร้างกลุ่ม '{group.Name}' สำเร็จ";
         return RedirectToPage();
     }
 
@@ -79,6 +88,7 @@ public class IndexModel : PageModel
         {
             _dbContext.DeviceGroups.Remove(group);
             await _dbContext.SaveChangesAsync();
+            TempData["Success"] = $"ลบกลุ่ม '{group.Name}' เรียบร้อย";
         }
         return RedirectToPage();
     }

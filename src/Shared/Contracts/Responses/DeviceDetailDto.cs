@@ -15,5 +15,7 @@ public record DeviceDetailDto(
     [property: JsonPropertyName("hardware")] HardwareSnapshotDto? Hardware,
     [property: JsonPropertyName("services")] IReadOnlyCollection<ServiceStatusDto> Services,
     [property: JsonPropertyName("processes")] IReadOnlyCollection<TrackedProcessDto> Processes,
-    [property: JsonPropertyName("groups")] IReadOnlyCollection<DeviceGroupDto> Groups
+    [property: JsonPropertyName("groups")] IReadOnlyCollection<DeviceGroupDto> Groups,
+    [property: JsonPropertyName("companyCode")] string? CompanyCode,
+    [property: JsonPropertyName("storeCode")] string? StoreCode
 );

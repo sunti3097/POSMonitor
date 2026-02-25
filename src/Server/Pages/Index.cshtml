@@ -1,34 +1,41 @@
 ﻿@page
 @model POSMonitor.Server.Pages.IndexModel
+@using POSMonitor.Shared.Enums
 @{
     ViewData["Title"] = "Dashboard";
-    var onlineCount = Model.Devices.Count(d => d.Status == POSMonitor.Shared.Enums.DeviceStatus.Online);
+    var onlineCount = Model.Devices.Count(d => d.Status == DeviceStatus.Online);
+    var companies = Model.Devices
+        .Where(d => !string.IsNullOrWhiteSpace(d.CompanyCode))
+        .Select(d => d.CompanyCode!).Distinct().OrderBy(c => c).ToList();
+    var devicesByCompany = Model.Devices
+        .GroupBy(d => string.IsNullOrWhiteSpace(d.CompanyCode) ? "ไม่ระบุบริษัท" : d.CompanyCode)
+        .OrderBy(g => g.Key).ToList();
 }
 
 <div class="stat-grid">
     <div class="stat-card">
-        <div class="stat-icon"></div>
+        <div class="stat-icon">🖥️</div>
         <div class="stat-content">
             <div class="stat-value">@Model.TotalDevices</div>
-            <div class="stat-label">Total</div>
+            <div class="stat-label">เครื่องทั้งหมด</div>
         </div>
     </div>
     <div class="stat-card success">
-        <div class="stat-icon"></div>
+        <div class="stat-icon">✅</div>
         <div class="stat-content">
             <div class="stat-value">@onlineCount</div>
             <div class="stat-label">Online</div>
         </div>
     </div>
     <div class="stat-card warning">
-        <div class="stat-icon"></div>
+        <div class="stat-icon">⚠️</div>
         <div class="stat-content">
             <div class="stat-value">@Model.WarningDevices</div>
             <div class="stat-label">Warning</div>
         </div>
     </div>
     <div class="stat-card danger">
-        <div class="stat-icon"></div>
+        <div class="stat-icon">🔴</div>
         <div class="stat-content">
             <div class="stat-value">@Model.OfflineDevices</div>
             <div class="stat-label">Offline</div>
@@ -38,130 +45,231 @@
 
 <div class="filter-bar">
     <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Search ComName, POS ID, Store..." />
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted)"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>
+        <input type="text" id="searchInput" placeholder="ค้นหา POS ID, ชื่อเครื่อง, IP..." />
     </div>
     <select class="filter-select" id="companyFilter">
-        <option value="">All Companies</option>
-        @foreach (var group in Model.GroupBreakdown)
+        <option value="">ทุกบริษัท</option>
+        @foreach (var c in companies)
         {
-            <option value="@group.Name">@group.Name</option>
+            <option value="@c">@c</option>
         }
     </select>
     <select class="filter-select" id="statusFilter">
-        <option value="">All Status</option>
+        <option value="">ทุกสถานะ</option>
         <option value="online">Online</option>
-        <option value="warning">Warning</option>
+        <option value="degraded">Warning</option>
         <option value="offline">Offline</option>
     </select>
     <div class="view-toggle">
-        <button class="view-btn active" data-view="grid" onclick="switchView('grid')">Grid</button>
-        <button class="view-btn" data-view="table" onclick="switchView('table')">Table</button>
+        <button class="view-btn active" data-view="grid" onclick="switchView('grid')">⊞ Grid</button>
+        <button class="view-btn" data-view="table" onclick="switchView('table')">≡ Table</button>
     </div>
 </div>
 
-<div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Showing @Model.TotalDevices / @Model.TotalDevices machines</div>
+<div class="result-summary" id="resultSummary">แสดง @Model.TotalDevices เครื่อง</div>
 
+<!-- Grid View -->
 <div id="gridView" class="view-content active">
-    <div class="group-section">
-        <div class="group-header">
-            <div class="group-icon"></div>
-            <span class="group-name">All Devices</span>
-            <span class="group-count">(@Model.TotalDevices)</span>
+    @if (!Model.Devices.Any())
+    {
+        <div class="empty-state-full">
+            <div style="font-size:3rem">🖥️</div>
+            <h3>ยังไม่มีเครื่อง POS</h3>
+            <p>เครื่อง POS จะปรากฏที่นี่เมื่อ Agent ส่ง heartbeat มาครั้งแรก</p>
         </div>
-        <div class="machine-grid">
-            @foreach (var device in Model.Devices)
-            {
-                var statusClass = device.Status.ToString().ToLower();
-                var cpu = 0;
-                var ram = 0;
-                <div class="machine-card @statusClass" data-status="@statusClass">
-                    <div class="machine-header">
-                        <div class="machine-id">@device.DeviceId</div>
-                        <span class="status-badge @statusClass">
-                            <span class="status-dot"></span>@device.Status
-                        </span>
-                    </div>
-                    <div class="machine-info">
-                        <div class="machine-label">POS @device.DeviceId</div>
-                        <div class="machine-value">@(statusClass == "offline" ? " Scheduled Off" : " Running")</div>
-                    </div>
-                    <div class="machine-metrics">
-                        <div>
-                            <div class="metric-row"><span class="metric-label">CPU</span><span class="metric-value">@cpu%</span></div>
-                            <div class="metric-bar"><div class="metric-bar-fill cpu" style="width: @(cpu)%"></div></div>
-                        </div>
-                        <div>
-                            <div class="metric-row"><span class="metric-label">RAM</span><span class="metric-value">@ram%</span></div>
-                            <div class="metric-bar"><div class="metric-bar-fill ram" style="width: @(ram)%"></div></div>
-                        </div>
-                    </div>
+    }
+    else
+    {
+        @foreach (var companyGroup in devicesByCompany)
+        {
+            var compOnline = companyGroup.Count(d => d.Status == DeviceStatus.Online);
+            var compOffline = companyGroup.Count(d => d.Status == DeviceStatus.Offline);
+            <div class="group-section" data-company="@companyGroup.Key">
+                <div class="group-header">
+                    <span class="group-icon">🏢</span>
+                    <span class="group-name">@companyGroup.Key</span>
+                    <span class="group-count">@companyGroup.Count() เครื่อง</span>
+                    @if (compOnline > 0)
+                    {
+                        <span class="group-pill online">@compOnline Online</span>
+                    }
+                    @if (compOffline > 0)
+                    {
+                        <span class="group-pill offline">@compOffline Offline</span>
+                    }
                 </div>
-            }
-        </div>
-    </div>
+                <div class="machine-grid">
+                    @foreach (var device in companyGroup.OrderBy(d => d.StoreCode).ThenBy(d => d.DeviceId))
+                    {
+                        var statusClass = device.Status.ToString().ToLower();
+                        var lastSeen = device.LastHeartbeatAt?.ToLocalTime().ToString("dd/MM HH:mm") ?? "ไม่เคย";
+                        <div class="machine-card @statusClass" 
+                             data-status="@statusClass" 
+                             data-company="@(device.CompanyCode ?? "")" 
+                             data-text="@device.DeviceId @device.Hostname @device.IpAddress @device.StoreCode">
+                            <div class="machine-header">
+                                <div class="machine-id">@device.DeviceId</div>
+                                <span class="status-badge @statusClass">
+                                    <span class="status-dot"></span>@device.Status
+                                </span>
+                            </div>
+                            <div class="machine-hostname">@(string.IsNullOrEmpty(device.Hostname) ? "-" : device.Hostname)</div>
+                            @if (!string.IsNullOrEmpty(device.StoreCode))
+                            {
+                                <div class="machine-store">📍 @device.StoreCode</div>
+                            }
+                            <div class="machine-ip">🌐 @(device.IpAddress ?? "-")</div>
+                            <div class="machine-lastseen">🕒 @lastSeen</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
 </div>
 
+<!-- Table View -->
 <div id="tableView" class="view-content">
     <div class="machine-table-container">
-        <table class="machine-table">
-            <thead>
-                <tr>
-                    <th>POS ID</th>
-                    <th>Name</th>
-                    <th>Group</th>
-                    <th>IP Address</th>
-                    <th>Status</th>
-                    <th>CPU %</th>
-                    <th>RAM %</th>
-                    <th>Last Heartbeat</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var device in Model.Devices)
-                {
-                    var statusClass = device.Status.ToString().ToLower();
-                    var cpu = 0;
-                    var ram = 0;
-                    <tr data-status="@statusClass">
-                        <td class="id-cell">@device.DeviceId</td>
-                        <td>@(device.Hostname ?? "POS " + device.DeviceId)</td>
-                        <td>@(device.GroupName ?? "-")</td>
-                        <td>@(device.IpAddress ?? "-")</td>
-                        <td class="status-cell">
-                            <span class="status-badge @statusClass"><span class="status-dot"></span>@device.Status</span>
-                        </td>
-                        <td>@cpu%</td>
-                        <td>@ram%</td>
-                        <td>@(device.LastHeartbeatAt?.ToLocalTime().ToString("dd/MM/yy HH:mm") ?? "Never")</td>
+        @if (!Model.Devices.Any())
+        {
+            <div class="empty-state-full">
+                <div style="font-size:3rem">🖥️</div>
+                <h3>ยังไม่มีเครื่อง POS</h3>
+            </div>
+        }
+        else
+        {
+            <table class="machine-table">
+                <thead>
+                    <tr>
+                        <th>POS ID</th>
+                        <th>ชื่อเครื่อง</th>
+                        <th>บริษัท / สาขา</th>
+                        <th>IP Address</th>
+                        <th>สถานะ</th>
+                        <th>Last Heartbeat</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var device in Model.Devices)
+                    {
+                        var statusClass = device.Status.ToString().ToLower();
+                        <tr data-status="@statusClass" 
+                            data-company="@(device.CompanyCode ?? "")" 
+                            data-text="@device.DeviceId @device.Hostname @device.IpAddress @device.StoreCode">
+                            <td class="id-cell">@device.DeviceId</td>
+                            <td>@(device.Hostname ?? "-")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(device.CompanyCode))
+                                {
+                                    <span class="badge-company">@device.CompanyCode</span>
+                                }
+                                @if (!string.IsNullOrEmpty(device.StoreCode))
+                                {
+                                    <span class="badge-store">@device.StoreCode</span>
+                                }
+                                @if (string.IsNullOrEmpty(device.CompanyCode) && string.IsNullOrEmpty(device.StoreCode))
+                                {
+                                    <span style="color:var(--text-muted)">-</span>
+                                }
+                            </td>
+                            <td>@(device.IpAddress ?? "-")</td>
+                            <td>
+                                <span class="status-badge @statusClass"><span class="status-dot"></span>@device.Status</span>
+                            </td>
+                            <td>@(device.LastHeartbeatAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "ไม่เคย")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 </div>
+
+<style>
+.result-summary{color:var(--text-muted);font-size:0.82rem;margin-bottom:14px}
+.empty-state-full{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state-full h3{font-size:1.1rem;color:var(--text);margin:12px 0 8px}
+.group-section{margin-bottom:28px}
+.group-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--purple-100)}
+.group-icon{font-size:1.1rem}
+.group-name{font-size:1rem;font-weight:700;color:var(--text)}
+.group-count{font-size:0.82rem;color:var(--text-muted);background:var(--purple-50);padding:2px 8px;border-radius:12px}
+.group-pill{font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:12px}
+.group-pill.online{background:#dcfce7;color:#166534}
+.group-pill.offline{background:#fee2e2;color:#991b1b}
+.machine-hostname{font-size:0.82rem;font-weight:500;color:var(--text);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.machine-store{font-size:0.75rem;color:var(--purple-600);margin-top:3px}
+.machine-ip{font-size:0.75rem;color:var(--text-muted);margin-top:3px}
+.machine-lastseen{font-size:0.72rem;color:var(--text-muted);margin-top:6px;border-top:1px solid rgba(0,0,0,0.06);padding-top:6px}
+.badge-company{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:var(--purple-100);color:var(--purple-700);margin-right:4px}
+.badge-store{display:inline-block;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:#fef3c7;color:#92400e;margin-right:4px}
+.view-content{display:none}
+.view-content.active{display:block}
+.machine-table-container{overflow-x:auto}
+.machine-table{width:100%;border-collapse:collapse}
+.machine-table th{padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);background:var(--purple-50);border-bottom:1px solid var(--border)}
+.machine-table td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.88rem;color:var(--text)}
+.machine-table tbody tr:hover{background:var(--purple-50)}
+.id-cell{font-weight:600;font-family:monospace;color:var(--purple-700)}
+.search-box{position:relative;flex:1}
+.search-box input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--border);border-radius:8px;background:var(--bg);font-size:0.88rem;color:var(--text);box-sizing:border-box}
+.search-box input:focus{border-color:var(--purple-400);outline:none;box-shadow:0 0 0 3px var(--purple-100)}
+</style>
 
 <script>
     function switchView(view) {
-        document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.view-content').forEach(content => content.classList.remove('active'));
-        document.querySelector(`[data-view="${view}"]`).classList.add('active');
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view-content').forEach(c => c.classList.remove('active'));
+        document.querySelector('[data-view="' + view + '"]').classList.add('active');
         document.getElementById(view + 'View').classList.add('active');
+        filterMachines();
     }
-    
+
     function filterMachines() {
         const search = document.getElementById('searchInput').value.toLowerCase();
-        const status = document.getElementById('statusFilter').value;
-        
-        document.querySelectorAll('.machine-card, .machine-table tbody tr').forEach(el => {
-            const elStatus = el.dataset.status;
-            const elText = el.textContent.toLowerCase();
-            const matchesSearch = elText.includes(search);
-            const matchesStatus = !status || elStatus === status;
-            el.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+        const company = document.getElementById('companyFilter').value.toLowerCase();
+        const status = document.getElementById('statusFilter').value.toLowerCase();
+        let visible = 0;
+
+        // Filter cards
+        document.querySelectorAll('.machine-card').forEach(el => {
+            const elStatus = (el.dataset.status || '').toLowerCase();
+            const elCompany = (el.dataset.company || '').toLowerCase();
+            const elText = (el.dataset.text || el.textContent).toLowerCase();
+            const ok = (!search || elText.includes(search))
+                    && (!company || elCompany === company)
+                    && (!status || elStatus === status);
+            el.style.display = ok ? '' : 'none';
+            if (ok) visible++;
         });
+
+        // Filter table rows
+        document.querySelectorAll('.machine-table tbody tr').forEach(el => {
+            const elStatus = (el.dataset.status || '').toLowerCase();
+            const elCompany = (el.dataset.company || '').toLowerCase();
+            const elText = (el.dataset.text || el.textContent).toLowerCase();
+            const ok = (!search || elText.includes(search))
+                    && (!company || elCompany === company)
+                    && (!status || elStatus === status);
+            el.style.display = ok ? '' : 'none';
+        });
+
+        // Hide empty group sections
+        document.querySelectorAll('.group-section').forEach(section => {
+            const secCompany = (section.dataset.company || '').toLowerCase();
+            const hasVisible = Array.from(section.querySelectorAll('.machine-card'))
+                                    .some(c => c.style.display !== 'none');
+            section.style.display = (!company || secCompany === company) && hasVisible ? '' : 'none';
+        });
+
+        document.getElementById('resultSummary').textContent = 'แสดง ' + visible + ' เครื่อง';
     }
-    
+
     document.getElementById('searchInput').addEventListener('input', filterMachines);
     document.getElementById('companyFilter').addEventListener('change', filterMachines);
     document.getElementById('statusFilter').addEventListener('change', filterMachines);
+    filterMachines();
 </script>

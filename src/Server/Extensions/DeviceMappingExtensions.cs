@@ -25,7 +25,9 @@ public static class DeviceMappingExtensions
             device.NetworkStatus,
             device.LastHeartbeatAt,
             primaryGroup?.Id,
-            primaryGroup?.Name);
+            primaryGroup?.Name,
+            device.CompanyCode,
+            device.StoreCode);
     }
 
     public static DeviceDetailDto ToDetailDto(this Device device)
@@ -46,7 +48,9 @@ public static class DeviceMappingExtensions
                 .Where(g => g != null)
                 .Cast<DeviceGroup>()
                 .Select(g => g.ToDto())
-                .ToList());
+                .ToList(),
+            device.CompanyCode,
+            device.StoreCode);
     }
 
     public static HardwareSnapshotDto? DeserializeHardware(this Device device)

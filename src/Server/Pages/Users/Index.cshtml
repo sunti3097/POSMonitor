@@ -35,7 +35,7 @@
             <div class="form-group">
                 <label>บทบาท</label>
                 <select asp-for="NewRole" class="form-control">
-                    <option value="">ผู้ใช้ทั่วไป</option>
+                    <option value="User">ผู้ใช้ทั่วไป</option>
                     <option value="Admin">ผู้ดูแลระบบ</option>
                 </select>
             </div>
@@ -71,9 +71,16 @@
                                 }
                             </td>
                             <td>
-                                @foreach (var role in user.Roles)
+                                @if (user.Roles.Any())
                                 {
-                                    <span class="badge badge-role">@role</span>
+                                    @foreach (var role in user.Roles)
+                                    {
+                                        <span class="badge badge-role @(role == "Admin" ? "badge-admin" : "")">@role</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">ไม่มีสิทธิ์</span>
                                 }
                             </td>
                             <td>
@@ -149,6 +156,7 @@
 .cell-title{font-weight:600;color:var(--text)}
 .badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:600;margin-right:4px}
 .badge-role{background:var(--purple-100);color:var(--purple-700)}
+.badge-admin{background:#fef3c7;color:#92400e}
 .badge-warning{background:var(--warning-light);color:var(--warning)}
 .text-success{color:var(--success)}
 .text-danger{color:var(--danger)}

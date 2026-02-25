@@ -40,9 +40,12 @@ public class IndexModel : PageModel
             .ToList();
 
         GroupBreakdown = Devices
-            .GroupBy(d => string.IsNullOrWhiteSpace(d.GroupName) ? "ไม่มีกลุ่ม" : d.GroupName)
+            .GroupBy(d => new { 
+                Company = string.IsNullOrWhiteSpace(d.CompanyCode) ? "ไม่ระบุบริษัท" : d.CompanyCode, 
+                Store = string.IsNullOrWhiteSpace(d.StoreCode) ? "ไม่ระบุสาขา" : d.StoreCode 
+            })
             .Select(g => new GroupSummary(
-                g.Key ?? "ไม่มีกลุ่ม",
+                $"{g.Key.Company} - {g.Key.Store}",
                 g.Count(),
                 g.Count(x => x.Status == DeviceStatus.Offline)))
             .OrderByDescending(g => g.Total)

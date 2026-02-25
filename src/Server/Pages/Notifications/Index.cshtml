@@ -21,7 +21,7 @@
             <h3 class="panel-title">📧 การตั้งค่าอีเมล (SMTP)</h3>
         </div>
         <div class="panel-body">
-            <form method="post" asp-page-handler="SaveEmail">
+            <form method="post" asp-page-handler="SaveEmail" class="notify-form">
                 <div class="form-check">
                     <input type="checkbox" asp-for="EnableEmail" class="form-check-input" />
                     <label>เปิดใช้งานการแจ้งเตือนทางอีเมล</label>
@@ -48,7 +48,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">บันทึก</button>
-                    <button type="submit" asp-page-handler="TestEmail" class="btn btn-secondary">ทดสอบส่ง</button>
+                    <button type="submit" formaction="/Notifications?handler=TestEmail" class="btn btn-secondary">ทดสอบส่ง</button>
                 </div>
             </form>
         </div>
@@ -60,7 +60,7 @@
             <h3 class="panel-title">💬 Microsoft Teams Webhook</h3>
         </div>
         <div class="panel-body">
-            <form method="post" asp-page-handler="SaveTeams">
+            <form method="post" asp-page-handler="SaveTeams" class="notify-form">
                 <div class="form-check">
                     <input type="checkbox" asp-for="EnableTeams" class="form-check-input" />
                     <label>เปิดใช้งานการแจ้งเตือนทาง MS Teams</label>
@@ -73,7 +73,7 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">บันทึก</button>
-                    <button type="submit" asp-page-handler="TestTeams" class="btn btn-secondary">ทดสอบส่ง</button>
+                    <button type="submit" formaction="/Notifications?handler=TestTeams" class="btn btn-secondary">ทดสอบส่ง</button>
                 </div>
             </form>
         </div>
@@ -111,7 +111,7 @@
                     <tbody>
                         @foreach (var group in Model.Groups)
                         {
-                            var config = Model.Configs.FirstOrDefault(c => c.GroupName == group.Name);
+                            var config = Model.Configs.FirstOrDefault(c => c.GroupId == group.Id);
                             <tr>
                                 <td><div class="cell-title">@group.Name</div></td>
                                 <td>
