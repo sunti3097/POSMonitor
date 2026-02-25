@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using POSMonitor.Server.Data;
 
@@ -11,9 +12,11 @@ using POSMonitor.Server.Data;
 namespace POSMonitor.Server.Data.Migrations
 {
     [DbContext(typeof(POSMonitorDbContext))]
-    partial class POSMonitorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260225135142_AddCompanyStoreFields")]
+    partial class AddCompanyStoreFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -354,10 +357,10 @@ namespace POSMonitor.Server.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CompanyCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 

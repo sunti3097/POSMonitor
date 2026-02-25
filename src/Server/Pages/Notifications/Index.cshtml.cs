@@ -61,10 +61,10 @@ public class IndexModel : PageModel
             .Select(n => new NotificationConfigViewModel
             {
                 Id = n.Id,
-                GroupName = n.DeviceGroup.Name,
-                StartHour = n.StartHour,
-                EndHour = n.EndHour,
-                DaysOfWeek = n.DaysOfWeek
+                GroupName = n.DeviceGroup!.Name,
+                StartHour = n.StartTime.Hours,
+                EndHour = n.EndTime.Hours,
+                DaysOfWeek = n.DayOfWeek.ToString()
             })
             .ToListAsync();
     }
