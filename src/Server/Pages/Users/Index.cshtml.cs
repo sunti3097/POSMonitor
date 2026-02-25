@@ -52,9 +52,17 @@ public class IndexModel : PageModel
         {
             var user = new AppUser { UserName = NewEmail, Email = NewEmail };
             var result = await _userManager.CreateAsync(user, NewPassword);
-            if (result.Succeeded && !string.IsNullOrEmpty(NewRole))
+            if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, NewRole);
+                if (!string.IsNullOrEmpty(NewRole))
+                {
+                    await _userManager.AddToRoleAsync(user, NewRole);
+                }
+                TempData["Success"] = "สร้างผู้ใช้สำเร็จ";
+            }
+            else
+            {
+                TempData["Error"] = string.Join(", ", result.Errors.Select(e => e.Description));
             }
         }
         return RedirectToPage();
