@@ -1,0 +1,171 @@
+@page "/Devices/Detail/{id:guid}"
+@model POSMonitor.Server.Pages.Devices.DetailModel
+@{
+    ViewData["Title"] = $"Detail: {Model.Device.Hostname}";
+}
+
+<div class="page-header">
+    <div class="header-content">
+        <h2 class="page-subtitle">@Model.Device.Hostname</h2>
+        <div class="badges">
+            <span class="badge @Model.Device.Status.ToString().ToLower()">@Model.Device.Status</span>
+            <span class="badge company">@Model.Device.CompanyCode - @Model.Device.StoreCode</span>
+        </div>
+    </div>
+    <div class="actions">
+        <a href="/" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="grid-layout">
+    <!-- Hardware Stats -->
+    <div class="card">
+        <h3>Hardware Usage</h3>
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <span class="label">CPU</span>
+                <span class="value">@(Model.Device.Hardware?.CpuPercent ?? 0)%</span>
+                <div class="progress-bar">
+                    <div class="fill" style="width: @(Model.Device.Hardware?.CpuPercent ?? 0)%"></div>
+                </div>
+            </div>
+            <div class="metric-item">
+                <span class="label">Memory</span>
+                <span class="value">@(Model.Device.Hardware?.MemoryPercent ?? 0)%</span>
+                <div class="progress-bar">
+                    <div class="fill" style="width: @(Model.Device.Hardware?.MemoryPercent ?? 0)%"></div>
+                </div>
+                <small>@Model.Device.Hardware?.FreeMemoryGb GB free / @Model.Device.Hardware?.TotalMemoryGb GB</small>
+            </div>
+            <div class="metric-item">
+                <span class="label">Disk</span>
+                <span class="value">@(Model.Device.Hardware?.DiskFreeGb ?? 0) GB Free</span>
+                <small>of @Model.Device.Hardware?.DiskTotalGb GB Total</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info -->
+    <div class="card">
+        <h3>Device Info</h3>
+        <table class="info-table">
+            <tr>
+                <th>Device ID</th>
+                <td>@Model.Device.DeviceId</td>
+            </tr>
+            <tr>
+                <th>IP Address</th>
+                <td>@Model.Device.IpAddress</td>
+            </tr>
+            <tr>
+                <th>Last Seen</th>
+                <td>@(Model.Device.LastHeartbeatAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss") ?? "Never")</td>
+            </tr>
+            <tr>
+                <th>Uptime</th>
+                <td>@(Model.Device.Hardware != null ? TimeSpan.FromSeconds(Model.Device.Hardware.UptimeSeconds).ToString(@"dd\.hh\:mm") : "-")</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Services -->
+    <div class="card full-width">
+        <h3>Monitored Services</h3>
+        @if (Model.Device.Services?.Any() == true)
+        {
+            <div class="status-grid">
+                @foreach (var svc in Model.Device.Services)
+                {
+                    <div class="status-item @(svc.IsRunning ? "up" : "down")">
+                        <span class="indicator"></span>
+                        <span class="name">@svc.Name</span>
+                        <span class="state">@(svc.IsRunning ? "Running" : "Stopped")</span>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">No services monitored</p>
+        }
+    </div>
+
+    <!-- Processes -->
+    <div class="card full-width">
+        <h3>Monitored Processes</h3>
+        @if (Model.Device.Processes?.Any() == true)
+        {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Process</th>
+                        <th>Status</th>
+                        <th>Memory</th>
+                        <th>Started</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var proc in Model.Device.Processes)
+                    {
+                        <tr>
+                            <td>@proc.Name</td>
+                            <td>
+                                <span class="status-badge @(proc.IsRunning ? "success" : "danger")">
+                                    @(proc.IsRunning ? "Running" : "Stopped")
+                                </span>
+                            </td>
+                            <td>@(proc.MemoryMb?.ToString("N0") ?? "-") MB</td>
+                            <td>@(proc.LastStartTime?.ToLocalTime().ToString("dd/MM HH:mm") ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">No processes monitored</p>
+        }
+    </div>
+</div>
+
+<style>
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .header-content { display: flex; align-items: center; gap: 16px; }
+    .badges { display: flex; gap: 8px; }
+    .badge { padding: 4px 12px; border-radius: 16px; font-weight: 600; font-size: 0.85rem; }
+    .badge.online { background: #dcfce7; color: #166534; }
+    .badge.offline { background: #fee2e2; color: #991b1b; }
+    .badge.company { background: var(--purple-100); color: var(--purple-700); }
+    
+    .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-column: 1 / -1; }
+    
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+    .card h3 { margin-top: 0; margin-bottom: 16px; font-size: 1.1rem; color: var(--text); }
+    
+    .metrics-grid { display: flex; flex-direction: column; gap: 16px; }
+    .metric-item { display: flex; flex-direction: column; gap: 4px; }
+    .progress-bar { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+    .fill { height: 100%; background: var(--purple-600); }
+    
+    .info-table { width: 100%; }
+    .info-table th { text-align: left; padding: 8px 0; color: var(--text-muted); width: 40%; }
+    .info-table td { text-align: right; color: var(--text); font-family: monospace; }
+    
+    .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .status-item { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
+    .status-item.up { border-color: #bbf7d0; background: #f0fdf4; }
+    .status-item.down { border-color: #fecaca; background: #fef2f2; }
+    .indicator { width: 10px; height: 10px; border-radius: 50%; }
+    .up .indicator { background: #16a34a; }
+    .down .indicator { background: #dc2626; }
+    .name { font-weight: 500; flex: 1; }
+    .state { font-size: 0.8rem; color: var(--text-muted); }
+    
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 8px; border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; }
+    .data-table td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .status-badge.success { background: #dcfce7; color: #166534; }
+    .status-badge.danger { background: #fee2e2; color: #991b1b; }
+</style>

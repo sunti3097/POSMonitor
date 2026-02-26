@@ -103,12 +103,13 @@ else
                             @foreach (var device in store.Devices)
                             {
                                 var statusRaw = device.Status.ToString().ToLower();
-                                var sc = (device.Status == DeviceStatus.Unknown) ? "degraded" : statusRaw;
+                                var sc = device.Status.ToString().ToLower();
                                 var lastTime = device.LastHeartbeatAt?.ToLocalTime().ToString("HH:mm") ?? "--:--";
                                 <div class="pos-row @sc"
                                      data-status="@sc"
                                      data-company="@(device.CompanyCode ?? "")"
-                                     data-text="@device.DeviceId @device.Hostname @device.IpAddress @device.StoreCode">
+                                     data-text="@device.DeviceId @device.Hostname @device.IpAddress @device.StoreCode"
+                                     onclick="location.href='/Devices/Detail/@device.Id'">
                                     <span class="pos-indicator @sc"></span>
                                     <span class="pos-id">@device.DeviceId</span>
                                     <span class="pos-ip">@(device.IpAddress ?? "-")</span>
@@ -165,7 +166,7 @@ else
 
 /* POS rows */
 .pos-rows{display:flex;flex-direction:column}
-.pos-row{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid var(--border);transition:background .15s;font-size:0.85rem}
+.pos-row{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid var(--border);transition:background .15s;font-size:0.85rem;cursor:pointer}
 .pos-row:last-child{border-bottom:none}
 .pos-row:hover{background:var(--purple-50)}
 .pos-row.online{background:linear-gradient(90deg,#f0fdf4 0,var(--surface) 6px)}

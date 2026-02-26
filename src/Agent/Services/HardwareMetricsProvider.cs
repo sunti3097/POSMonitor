@@ -24,6 +24,8 @@ public class HardwareMetricsProvider : IDisposable
             memoryPercent,
             diskFree,
             diskTotal,
+            totalGb,
+            freeGb,
             uptimeSeconds);
     }
 
