@@ -113,11 +113,15 @@ else
                                     <span class="pos-indicator @sc"></span>
                                     <span class="pos-id">@device.DeviceId</span>
                                     <span class="pos-ip">@(device.IpAddress ?? "-")</span>
-                                    <span class="pos-time">@lastTime</span>
-                                    @if (!string.IsNullOrEmpty(device.Hostname) && device.Hostname != device.DeviceId)
+                                    @if (!string.IsNullOrEmpty(device.Hostname))
                                     {
                                         <span class="pos-hostname">@device.Hostname</span>
                                     }
+                                    else
+                                    {
+                                        <span class="pos-hostname">-</span>
+                                    }
+                                    <span class="pos-time">@lastTime</span>
                                 </div>
                             }
                         </div>
@@ -181,7 +185,7 @@ else
 .pos-id{font-weight:700;font-family:monospace;color:var(--text);min-width:80px;font-size:0.88rem}
 .pos-ip{flex:1;color:var(--text-muted);font-size:0.82rem;font-family:monospace}
 .pos-time{font-size:0.78rem;color:var(--text-muted);font-family:monospace;min-width:40px;text-align:right}
-.pos-hostname{font-size:0.75rem;color:var(--text-muted);background:var(--purple-50);padding:1px 7px;border-radius:6px}
+.pos-hostname{font-size:0.75rem;color:var(--text-muted);background:var(--purple-50);padding:2px 8px;border-radius:6px;font-family:monospace;margin-left:auto;margin-right:12px}
 
 /* Search box */
 .search-box{position:relative;flex:1}
