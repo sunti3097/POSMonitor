@@ -10,28 +10,28 @@
 
 <!-- Stat Bar -->
 <div class="stat-grid">
-    <div class="stat-card" onclick="setFilter('')" tabindex="0" title="คลิกเพื่อดูทั้งหมด">
+    <div class="stat-card" onclick="setFilter('')" tabindex="0" title="Click to view all">
         <div class="stat-icon">🖥️</div>
         <div class="stat-content">
             <div class="stat-value">@Model.TotalDevices</div>
-            <div class="stat-label">ทั้งหมด</div>
+            <div class="stat-label">TOTAL</div>
         </div>
     </div>
-    <div class="stat-card success" onclick="setFilter('online')" tabindex="0" title="คลิกเพื่อดูเฉพาะ Online">
+    <div class="stat-card success" onclick="setFilter('online')" tabindex="0" title="Click to view Online">
         <div class="stat-icon">🟢</div>
         <div class="stat-content">
             <div class="stat-value">@Model.OnlineDevices</div>
             <div class="stat-label">ONLINE</div>
         </div>
     </div>
-    <div class="stat-card warning" onclick="setFilter('degraded')" tabindex="0" title="คลิกเพื่อดูเฉพาะ Warning">
+    <div class="stat-card warning" onclick="setFilter('degraded')" tabindex="0" title="Click to view Warning">
         <div class="stat-icon">⚠️</div>
         <div class="stat-content">
             <div class="stat-value">@Model.WarningDevices</div>
             <div class="stat-label">WARNING</div>
         </div>
     </div>
-    <div class="stat-card danger" onclick="setFilter('offline')" tabindex="0" title="คลิกเพื่อดูเฉพาะ Offline">
+    <div class="stat-card danger" onclick="setFilter('offline')" tabindex="0" title="Click to view Offline">
         <div class="stat-icon">🔴</div>
         <div class="stat-content">
             <div class="stat-value">@Model.OfflineDevices</div>
@@ -44,14 +44,14 @@
 <div class="filter-bar">
     <div class="search-box">
         <svg viewBox="0 0 20 20" fill="currentColor" width="15" height="15" class="search-icon"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>
-        <input type="text" id="searchInput" placeholder="ค้นหา POS ID, IP, สาขา..." />
+        <input type="text" id="searchInput" placeholder="Search POSID, IP, Store..." />
     </div>
     <select class="filter-select" id="companyFilter">
-        <option value="">ทุกบริษัท</option>
-        @foreach (var c in companies) { <option value="@c">บริษัท @c</option> }
+        <option value="">All Companies</option>
+        @foreach (var c in companies) { <option value="@c">Company @c</option> }
     </select>
     <select class="filter-select" id="statusFilter">
-        <option value="">ทุกสถานะ</option>
+        <option value="">All Statuses</option>
         <option value="online">Online</option>
         <option value="offline">Offline</option>
         <option value="degraded">Warning</option>
@@ -59,8 +59,8 @@
 </div>
 
 <div class="result-bar">
-    <span id="resultSummary">แสดง @Model.TotalDevices เครื่อง</span>
-    <span class="updated-at">อัปเดต @Model.GeneratedAt.ToLocalTime().ToString("HH:mm:ss")</span>
+    <span id="resultSummary">Showing @Model.TotalDevices devices</span>
+    <span class="updated-at">Updated at @Model.GeneratedAt.ToLocalTime().ToString("HH:mm:ss")</span>
 </div>
 
 <!-- Main Content: Company > Store > POS rows -->
@@ -68,8 +68,8 @@
 {
     <div class="empty-state-full">
         <div style="font-size:3rem">🖥️</div>
-        <h3>ยังไม่มีเครื่อง POS</h3>
-        <p>เครื่อง POS จะปรากฏที่นี่เมื่อ Agent ส่ง heartbeat มาครั้งแรก</p>
+        <h3>No POS Devices Found</h3>
+        <p>POS devices will appear here once an Agent sends its first heartbeat.</p>
     </div>
 }
 else
@@ -79,8 +79,8 @@ else
         <div class="company-block" data-company="@company.CompanyCode">
             <div class="company-heading">
                 <span class="company-icon-img">🏢</span>
-                <span class="company-title">บริษัท @company.CompanyCode</span>
-                <span class="company-meta">@company.Stores.Count สาขา · @company.TotalDevices เครื่อง</span>
+                <span class="company-title">Company @company.CompanyCode</span>
+                <span class="company-meta">@company.Stores.Count stores · @company.TotalDevices devices</span>
             </div>
 
             <div class="stores-list">
@@ -95,7 +95,7 @@ else
                             <div class="store-pills">
                                 <span class="pill online">@store.OnlineCount Online</span>
                                 <span class="pill offline">@store.OfflineCount Offline</span>
-                                <span class="pill total">@store.Devices.Count เครื่อง</span>
+                                <span class="pill total">@store.Devices.Count devices</span>
                             </div>
                         </div>
 
@@ -230,7 +230,7 @@ else
             cb.style.display = (!company || bc === company) && anyVisible ? '' : 'none';
         });
 
-        document.getElementById('resultSummary').textContent = 'แสดง ' + visible + ' เครื่อง';
+        document.getElementById('resultSummary').textContent = 'Showing ' + visible + ' devices';
     }
 
     document.getElementById('searchInput').addEventListener('input', filterAll);

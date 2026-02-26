@@ -2,10 +2,10 @@
 @model POSMonitor.Server.Pages.Account.LoginModel
 @{
     Layout = null;
-    ViewData["Title"] = "เข้าสู่ระบบ";
+    ViewData["Title"] = "Log In";
 }
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,8 +44,8 @@
                 </div>
             </div>
 
-            <h1 class="login-title">เข้าสู่ระบบ</h1>
-            <p class="login-desc">กรุณาเข้าสู่ระบบด้วยบัญชีที่ได้รับอนุญาต</p>
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-desc">Please sign in to your authorized account</p>
 
             @if (!ModelState.IsValid)
             {
@@ -61,7 +61,7 @@
             <form method="post" class="login-form">
                 <input type="hidden" asp-for="ReturnUrl" />
                 <div class="form-group">
-                    <label asp-for="Input.Email" class="form-label">อีเมล</label>
+                    <label asp-for="Input.Email" class="form-label">Email</label>
                     <div class="input-wrap">
                         <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z"/><path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z"/></svg>
                         <input asp-for="Input.Email" class="form-input" placeholder="admin@posmonitor.local" autocomplete="email" />
@@ -71,7 +71,7 @@
 
                 <div class="form-group">
                     <div class="form-label-row">
-                        <label asp-for="Input.Password" class="form-label">รหัสผ่าน</label>
+                        <label asp-for="Input.Password" class="form-label">Password</label>
                     </div>
                     <div class="input-wrap">
                         <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
@@ -86,25 +86,25 @@
                 <div class="form-check-row">
                     <label class="form-check">
                         <input asp-for="Input.RememberMe" type="checkbox" />
-                        <span>จดจำการเข้าสู่ระบบ 8 ชั่วโมง</span>
+                        <span>Keep me signed in for 8 hours</span>
                     </label>
                 </div>
 
                 <button type="submit" class="btn-login">
-                    <span>เข้าสู่ระบบ</span>
+                    <span>Sign In</span>
                     <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clip-rule="evenodd"/></svg>
                 </button>
             </form>
 
             <div class="login-footer">
                 <div class="policy-tags">
-                    <span>ตัวอักษรพิมพ์ใหญ่</span>
-                    <span>ตัวอักษรพิมพ์เล็ก</span>
-                    <span>ตัวเลข</span>
-                    <span>อักขระพิเศษ</span>
-                    <span>ขั้นต่ำ 10 ตัวอักษร</span>
+                    <span>Uppercase</span>
+                    <span>Lowercase</span>
+                    <span>Numbers</span>
+                    <span>Special Characters</span>
+                    <span>Minimum 10 characters</span>
                 </div>
-                <p class="policy-note">ระบบล็อคบัญชีอัตโนมัติหลังจากกรอกรหัสผ่านผิด 5 ครั้ง (15 นาที)</p>
+                <p class="policy-note">The system will automatically lock your account after 5 incorrect password attempts (15 minutes).</p>
             </div>
         </div>
     </div>

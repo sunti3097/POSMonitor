@@ -2,14 +2,14 @@
 @model POSMonitor.Server.Pages.Groups.IndexModel
 @using POSMonitor.Shared.Enums
 @{
-    ViewData["Title"] = "กลุ่มอุปกรณ์";
+    ViewData["Title"] = "Device Groups";
     var totalGroups = Model.CompanyGroups.Sum(c => c.Stores.Count);
     var totalDevices = Model.CompanyGroups.Sum(c => c.TotalDevices);
 }
 
 <div class="page-header">
-    <h2 class="page-subtitle">จัดการกลุ่มอุปกรณ์</h2>
-    <p class="page-description">จัดกลุ่ม POS ตามบริษัทและสาขา — @Model.CompanyGroups.Count บริษัท / @totalGroups สาขา / @totalDevices เครื่อง</p>
+    <h2 class="page-subtitle">Manage Device Groups</h2>
+    <p class="page-description">Organize POS devices by company and store — @Model.CompanyGroups.Count companies / @totalGroups stores / @totalDevices devices</p>
 </div>
 
 @if (TempData["Success"] != null)
@@ -24,41 +24,41 @@
 <!-- Create Group Form -->
 <div class="panel">
     <div class="panel-header">
-        <h3 class="panel-title">➕ เพิ่มสาขาใหม่</h3>
+        <h3 class="panel-title">➕ Add New Store</h3>
     </div>
     <div class="panel-body">
         <form method="post" asp-page-handler="Create" id="createForm">
             <div class="create-grid">
                 <div class="form-group">
-                    <label>รหัสบริษัท <span class="req">*</span></label>
-                    <input type="text" asp-for="NewCompanyCode" class="form-control" placeholder="เช่น 204" required />
-                    <small class="hint">รหัสตัวเลข/ตัวอักษรของบริษัท</small>
+                    <label>Company Code <span class="req">*</span></label>
+                    <input type="text" asp-for="NewCompanyCode" class="form-control" placeholder="e.g. 204" required />
+                    <small class="hint">Alphanumeric company code</small>
                 </div>
                 <div class="form-group">
-                    <label>รหัสสาขา / ชื่อสาขา <span class="req">*</span></label>
-                    <input type="text" asp-for="NewStoreCode" class="form-control" placeholder="เช่น BangNa-01" required />
-                    <small class="hint">ชื่อหรือรหัสสาขา</small>
+                    <label>Store Code / Name <span class="req">*</span></label>
+                    <input type="text" asp-for="NewStoreCode" class="form-control" placeholder="e.g. BangNa-01" required />
+                    <small class="hint">Store name or code</small>
                 </div>
                 <div class="form-group">
-                    <label>คำอธิบาย</label>
-                    <input type="text" asp-for="NewGroupDescription" class="form-control" placeholder="หมายเหตุเพิ่มเติม (ไม่บังคับ)" />
+                    <label>Description</label>
+                    <input type="text" asp-for="NewGroupDescription" class="form-control" placeholder="Optional notes" />
                 </div>
             </div>
 
             <!-- Device Picker -->
             <div class="device-picker-section">
                 <div class="device-picker-header">
-                    <span class="device-picker-title">🖥️ เลือกเครื่อง POS เข้ากลุ่ม</span>
-                    <span class="selected-count" id="selectedCount">ยังไม่เลือก</span>
+                    <span class="device-picker-title">🖥️ Select POS Devices</span>
+                    <span class="selected-count" id="selectedCount">None selected</span>
                 </div>
                 @if (!Model.AllDevices.Any())
                 {
-                    <div class="no-devices">ยังไม่มีเครื่อง POS ในระบบ (เครื่องจะปรากฏหลัง Agent ส่ง heartbeat)</div>
+                    <div class="no-devices">No POS devices in the system yet (devices will appear after the first heartbeat)</div>
                 }
                 else
                 {
                     <div class="search-picker">
-                        <input type="text" id="deviceSearch" placeholder="ค้นหาเครื่อง..." class="form-control-sm" />
+                        <input type="text" id="deviceSearch" placeholder="Search devices..." class="form-control-sm" />
                     </div>
                     <div class="device-grid" id="deviceGrid">
                         @foreach (var device in Model.AllDevices)
@@ -77,7 +77,7 @@
                                 }
                                 @if (!isUnassigned)
                                 {
-                                    <span class="chip-assigned">มีกลุ่มแล้ว</span>
+                                    <span class="chip-assigned">Assigned</span>
                                 }
                             </label>
                         }
@@ -86,8 +86,8 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">สร้างสาขา</button>
-                <button type="button" class="btn btn-ghost" onclick="document.getElementById('createForm').reset(); updateCount();">ล้างค่า</button>
+                <button type="submit" class="btn btn-primary">Create Store</button>
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('createForm').reset(); updateCount();">Clear</button>
             </div>
         </form>
     </div>
@@ -100,8 +100,8 @@
         <div class="panel-body">
             <div class="empty-state">
                 <div class="empty-icon">📁</div>
-                <div class="empty-title">ยังไม่มีกลุ่ม</div>
-                <p>เพิ่มสาขาแรกด้านบน</p>
+                <div class="empty-title">No Groups Yet</div>
+                <p>Add the first store above</p>
             </div>
         </div>
     </div>
@@ -113,8 +113,8 @@ else
         <div class="company-section">
             <div class="company-header">
                 <span class="company-icon">🏢</span>
-                <span class="company-name">บริษัท @company.CompanyCode</span>
-                <span class="company-stat">@company.Stores.Count สาขา</span>
+                <span class="company-name">Company @company.CompanyCode</span>
+                <span class="company-stat">@company.Stores.Count stores</span>
                 <span class="company-stat online">@company.OnlineDevices Online</span>
                 <span class="company-stat offline">@company.OfflineDevices Offline</span>
             </div>
@@ -133,8 +133,8 @@ else
                             </div>
                             <div class="store-actions">
                                 <form method="post" asp-page-handler="Delete" asp-route-id="@store.Id"
-                                      onsubmit="return confirm('ลบสาขา @store.StoreCode ?');" style="display:inline">
-                                    <button type="submit" class="btn-icon-danger" title="ลบสาขา">✕</button>
+                                      onsubmit="return confirm('Delete store @store.StoreCode ?');" style="display:inline">
+                                    <button type="submit" class="btn-icon-danger" title="Delete Store">✕</button>
                                 </form>
                             </div>
                         </div>
@@ -142,7 +142,7 @@ else
                         <div class="store-stats">
                             <span class="pill-online">@store.OnlineCount Online</span>
                             <span class="pill-offline">@store.OfflineCount Offline</span>
-                            <span class="pill-total">@store.Devices.Count เครื่อง</span>
+                            <span class="pill-total">@store.Devices.Count devices</span>
                         </div>
 
                         @if (store.Devices.Any())
@@ -162,7 +162,7 @@ else
                         }
                         else
                         {
-                            <div class="pos-empty">ยังไม่มีเครื่อง POS</div>
+                            <div class="pos-empty">No POS devices</div>
                         }
                     </div>
                 }
@@ -174,7 +174,7 @@ else
 @if (Model.UnassignedDevices.Any())
 {
     <div class="unassigned-section">
-        <div class="unassigned-header">⚠️ เครื่องที่ยังไม่ได้อยู่ในกลุ่ม (@Model.UnassignedDevices.Count เครื่อง)</div>
+        <div class="unassigned-header">⚠️ Unassigned Devices (@Model.UnassignedDevices.Count devices)</div>
         <div class="unassigned-list">
             @foreach (var d in Model.UnassignedDevices)
             {

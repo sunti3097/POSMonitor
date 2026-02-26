@@ -1,12 +1,12 @@
 @page "/Users"
 @model POSMonitor.Server.Pages.Users.IndexModel
 @{
-    ViewData["Title"] = "จัดการผู้ใช้";
+    ViewData["Title"] = "User Management";
 }
 
 <div class="page-header">
-    <h2 class="page-subtitle">จัดการผู้ใช้และรหัสผ่าน</h2>
-    <p class="page-description">เพิ่ม ลบ และจัดการสิทธิ์ผู้ใช้ระบบ</p>
+    <h2 class="page-subtitle">Manage Users & Passwords</h2>
+    <p class="page-description">Add, remove, and manage system user permissions</p>
 </div>
 
 @if (TempData["Error"] != null)
@@ -20,43 +20,43 @@
 
 <div class="panel">
     <div class="panel-header">
-        <h3 class="panel-title">เพิ่มผู้ใช้ใหม่</h3>
+        <h3 class="panel-title">Add New User</h3>
     </div>
     <div class="panel-body">
         <form method="post" asp-page-handler="Create" class="form-inline">
             <div class="form-group">
-                <label>อีเมล</label>
+                <label>Email</label>
                 <input type="email" asp-for="NewEmail" class="form-control" placeholder="user@company.com" required />
             </div>
             <div class="form-group">
-                <label>รหัสผ่าน</label>
-                <input type="password" asp-for="NewPassword" class="form-control" placeholder="รหัสผ่าน" required />
+                <label>Password</label>
+                <input type="password" asp-for="NewPassword" class="form-control" placeholder="Password" required />
             </div>
             <div class="form-group">
-                <label>บทบาท</label>
+                <label>Role</label>
                 <select asp-for="NewRole" class="form-control">
-                    <option value="User">ผู้ใช้ทั่วไป</option>
-                    <option value="Admin">ผู้ดูแลระบบ</option>
+                    <option value="User">User</option>
+                    <option value="Admin">Administrator</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">เพิ่มผู้ใช้</button>
+            <button type="submit" class="btn btn-primary">Add User</button>
         </form>
     </div>
 </div>
 
 <div class="panel">
     <div class="panel-header">
-        <h3 class="panel-title">รายชื่อผู้ใช้ (@Model.Users.Count)</h3>
+        <h3 class="panel-title">User List (@Model.Users.Count)</h3>
     </div>
     <div class="panel-body">
         <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>อีเมล</th>
-                        <th>บทบาท</th>
-                        <th>สถานะ</th>
-                        <th>จัดการ</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -67,7 +67,7 @@
                                 <div class="cell-title">@user.Email</div>
                                 @if (user.IsLockedOut)
                                 {
-                                    <span class="badge badge-warning">🔒 ล็อก</span>
+                                    <span class="badge badge-warning">🔒 Locked</span>
                                 }
                             </td>
                             <td>
@@ -80,26 +80,26 @@
                                 }
                                 else
                                 {
-                                    <span class="text-muted">ไม่มีสิทธิ์</span>
+                                    <span class="text-muted">No Role</span>
                                 }
                             </td>
                             <td>
                                 @if (user.IsLockedOut)
                                 {
-                                    <span class="text-danger">ล็อกชั่วคราว</span>
+                                    <span class="text-danger">Locked</span>
                                 }
                                 else
                                 {
-                                    <span class="text-success">ใช้งานได้</span>
+                                    <span class="text-success">Active</span>
                                 }
                             </td>
                             <td>
-                                <button type="button" class="btn btn-warning btn-sm" onclick="showResetModal('@user.Id')">รีเซ็ตรหัสผ่าน</button>
+                                <button type="button" class="btn btn-warning btn-sm" onclick="showResetModal('@user.Id')">Reset Password</button>
                                 @if (user.Email != User.Identity?.Name)
                                 {
                                     <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" 
-                                          onsubmit="return confirm('ยืนยันการลบผู้ใช้นี้?');" style="display:inline">
-                                        <button type="submit" class="btn btn-danger btn-sm">ลบ</button>
+                                          onsubmit="return confirm('Confirm user deletion?');" style="display:inline">
+                                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
                                     </form>
                                 }
                             </td>
@@ -114,16 +114,16 @@
 <!-- Reset Password Modal -->
 <div id="resetModal" class="modal" style="display:none">
     <div class="modal-content">
-        <h3>รีเซ็ตรหัสผ่าน</h3>
+        <h3>Reset Password</h3>
         <form method="post" asp-page-handler="ResetPassword" id="resetForm">
             <input type="hidden" name="id" id="resetUserId" />
             <div class="form-group">
-                <label>รหัสผ่านใหม่</label>
+                <label>New Password</label>
                 <input type="password" name="newPassword" class="form-control" required />
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn" onclick="hideResetModal()">ยกเลิก</button>
-                <button type="submit" class="btn btn-primary">บันทึก</button>
+                <button type="button" class="btn" onclick="hideResetModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
             </div>
         </form>
     </div>

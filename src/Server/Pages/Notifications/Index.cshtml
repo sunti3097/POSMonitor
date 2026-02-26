@@ -1,12 +1,12 @@
 @page "/Notifications"
 @model POSMonitor.Server.Pages.Notifications.IndexModel
 @{
-    ViewData["Title"] = "แจ้งเตือน";
+    ViewData["Title"] = "Notifications";
 }
 
 <div class="page-header">
-    <h2 class="page-subtitle">ตั้งค่าการแจ้งเตือน</h2>
-    <p class="page-description">กำหนดค่าการแจ้งเตือนผ่านอีเมลและ Microsoft Teams</p>
+    <h2 class="page-subtitle">Notification Settings</h2>
+    <p class="page-description">Configure notifications via Email and Microsoft Teams</p>
 </div>
 
 @if (TempData["Message"] != null)
@@ -18,13 +18,13 @@
     <!-- Email Configuration -->
     <div class="panel">
         <div class="panel-header">
-            <h3 class="panel-title">📧 การตั้งค่าอีเมล (SMTP)</h3>
+            <h3 class="panel-title">📧 Email Settings (SMTP)</h3>
         </div>
         <div class="panel-body">
             <form method="post" asp-page-handler="SaveEmail" class="notify-form">
                 <div class="form-check">
                     <input type="checkbox" asp-for="EnableEmail" class="form-check-input" />
-                    <label>เปิดใช้งานการแจ้งเตือนทางอีเมล</label>
+                    <label>Enable Email Notifications</label>
                 </div>
                 <div class="form-group">
                     <label>SMTP Server</label>
@@ -40,15 +40,15 @@
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" asp-for="SmtpPassword" class="form-control" placeholder="รหัสผ่าน" />
+                    <input type="password" asp-for="SmtpPassword" class="form-control" placeholder="Password" />
                 </div>
                 <div class="form-group">
                     <label>From Email</label>
                     <input type="email" asp-for="EmailFrom" class="form-control" placeholder="noreply@company.com" />
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">บันทึก</button>
-                    <button type="submit" formaction="/Notifications?handler=TestEmail" class="btn btn-secondary">ทดสอบส่ง</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" formaction="/Notifications?handler=TestEmail" class="btn btn-secondary">Test Send</button>
                 </div>
             </form>
         </div>
@@ -63,17 +63,17 @@
             <form method="post" asp-page-handler="SaveTeams" class="notify-form">
                 <div class="form-check">
                     <input type="checkbox" asp-for="EnableTeams" class="form-check-input" />
-                    <label>เปิดใช้งานการแจ้งเตือนทาง MS Teams</label>
+                    <label>Enable MS Teams Notifications</label>
                 </div>
                 <div class="form-group">
                     <label>Webhook URL</label>
                     <input type="url" asp-for="TeamsWebhookUrl" class="form-control" 
                            placeholder="https://outlook.office.com/webhook/..." />
-                    <small class="form-text">สร้าง Incoming Webhook จาก Teams channel settings</small>
+                    <small class="form-text">Create an Incoming Webhook from Teams channel settings</small>
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">บันทึก</button>
-                    <button type="submit" formaction="/Notifications?handler=TestTeams" class="btn btn-secondary">ทดสอบส่ง</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="submit" formaction="/Notifications?handler=TestTeams" class="btn btn-secondary">Test Send</button>
                 </div>
             </form>
         </div>
@@ -83,15 +83,15 @@
 <!-- Group Notification Schedule -->
 <div class="panel">
     <div class="panel-header">
-        <h3 class="panel-title">⏰ กำหนดเวลาแจ้งเตือนตามกลุ่ม</h3>
+        <h3 class="panel-title">⏰ Notification Schedule by Group</h3>
     </div>
     <div class="panel-body">
         @if (!Model.Groups.Any())
         {
             <div class="empty-state">
                 <div class="empty-state-icon">📅</div>
-                <p>ยังไม่มีกลุ่มอุปกรณ์ กรุณาสร้างกลุ่มก่อน</p>
-                <a href="/Groups" class="btn btn-primary">ไปที่หน้ากลุ่มอุปกรณ์</a>
+                <p>No device groups available. Please create a group first.</p>
+                <a href="/Groups" class="btn btn-primary">Go to Device Groups</a>
             </div>
         }
         else
@@ -100,12 +100,12 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>กลุ่ม</th>
-                            <th>รหัสบริษัท</th>
-                            <th>เวลาเริ่ม</th>
-                            <th>เวลาสิ้นสุด</th>
-                            <th>วันที่ใช้งาน</th>
-                            <th>จัดการ</th>
+                            <th>Group</th>
+                            <th>Company Code</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Active Days</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -126,10 +126,10 @@
                                 </td>
                                 <td>@(config?.StartHour.ToString() ?? "-"):00</td>
                                 <td>@(config?.EndHour.ToString() ?? "-"):00</td>
-                                <td>@(config?.DaysOfWeek ?? "ทุกวัน")</td>
+                                <td>@(config?.DaysOfWeek ?? "Every day")</td>
                                 <td>
                                     <button type="button" class="btn btn-primary btn-sm" onclick="showScheduleModal('@group.Id', '@group.Name', @(config?.StartHour ?? 0), @(config?.EndHour ?? 23))">
-                                        ตั้งค่า
+                                        Configure
                                     </button>
                                 </td>
                             </tr>
@@ -144,22 +144,22 @@
 <!-- Schedule Modal -->
 <div id="scheduleModal" class="modal" style="display:none">
     <div class="modal-content">
-        <h3>ตั้งเวลาแจ้งเตือน: <span id="modalGroupName"></span></h3>
+        <h3>Notification Schedule: <span id="modalGroupName"></span></h3>
         <form method="post" asp-page-handler="SaveSchedule">
             <input type="hidden" asp-for="ScheduleGroupId" id="modalGroupId" />
             
             <div class="form-group">
-                <label>เวลาเริ่ม (ชั่วโมง)</label>
+                <label>Start Time (Hour)</label>
                 <input type="number" asp-for="ScheduleStartHour" id="modalStartHour" class="form-control" min="0" max="23" required />
             </div>
             <div class="form-group">
-                <label>เวลาสิ้นสุด (ชั่วโมง)</label>
+                <label>End Time (Hour)</label>
                 <input type="number" asp-for="ScheduleEndHour" id="modalEndHour" class="form-control" min="0" max="23" required />
             </div>
             
             <div class="modal-actions">
-                <button type="button" class="btn" onclick="hideScheduleModal()">ยกเลิก</button>
-                <button type="submit" class="btn btn-primary">บันทึก</button>
+                <button type="button" class="btn" onclick="hideScheduleModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
             </div>
         </form>
     </div>
