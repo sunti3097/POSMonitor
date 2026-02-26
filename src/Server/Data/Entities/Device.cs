@@ -8,6 +8,7 @@ public class Device
     public string DeviceId { get; set; } = string.Empty;
     public string Hostname { get; set; } = string.Empty;
     public string IpAddress { get; set; } = string.Empty;
+    public string MacAddress { get; set; } = string.Empty;
     public DeviceStatus Status { get; set; } = DeviceStatus.Unknown;
     public NetworkStatus NetworkStatus { get; set; } = NetworkStatus.Unknown;
     public DateTimeOffset? LastHeartbeatAt { get; set; }

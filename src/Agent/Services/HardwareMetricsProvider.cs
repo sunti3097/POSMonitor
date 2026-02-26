@@ -17,11 +17,14 @@ public class HardwareMetricsProvider : IDisposable
 
         var (memoryPercent, totalGb, freeGb) = GetMemoryUsage();
         var (diskFree, diskTotal) = GetDiskInfo();
+        var diskUsed = diskTotal - diskFree;
+        var diskPercent = diskTotal <= 0 ? 0 : Math.Round((diskUsed / diskTotal) * 100, 2);
         var uptimeSeconds = (long)(TimeSpan.FromMilliseconds(Environment.TickCount64).TotalSeconds);
 
         return new HardwareSnapshotDto(
             cpuPercent,
             memoryPercent,
+            diskPercent,
             diskFree,
             diskTotal,
             totalGb,

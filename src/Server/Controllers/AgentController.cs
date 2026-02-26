@@ -45,7 +45,8 @@ public class AgentController : ControllerBase
             {
                 DeviceId = report.DeviceId,
                 Hostname = report.Hostname,
-                IpAddress = report.IpAddress
+                IpAddress = report.IpAddress,
+                MacAddress = report.MacAddress
             };
 
             await _dbContext.Devices.AddAsync(device, cancellationToken);
@@ -105,6 +106,7 @@ public class AgentController : ControllerBase
     {
         device.Hostname = report.Hostname;
         device.IpAddress = report.IpAddress;
+        device.MacAddress = report.MacAddress;
         device.NetworkStatus = report.NetworkStatus;
         device.Status = DeviceStatus.Online;
         device.LastHeartbeatAt = report.ReportedAt;

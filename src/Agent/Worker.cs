@@ -106,7 +106,7 @@ public class Worker : BackgroundService
 
     private async Task<HeartbeatReport> BuildReportAsync(CancellationToken cancellationToken)
     {
-        var (networkStatus, ipAddress) = await _networkProbeService.ProbeAsync(cancellationToken);
+        var (networkStatus, ipAddress, macAddress) = await _networkProbeService.ProbeAsync(cancellationToken);
         var hardware = await _hardwareMetricsProvider.CaptureAsync(cancellationToken);
         var services = await _serviceStatusCollector.CollectAsync(cancellationToken);
         var processes = await _processMonitorService.CollectAsync(cancellationToken);
@@ -115,6 +115,7 @@ public class Worker : BackgroundService
             _options.DeviceId,
             _options.HostnameOverride ?? Environment.MachineName,
             ipAddress,
+            macAddress,
             networkStatus,
             hardware,
             services,

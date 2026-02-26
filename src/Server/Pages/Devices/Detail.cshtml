@@ -39,8 +39,11 @@
             </div>
             <div class="metric-item">
                 <span class="label">Disk</span>
-                <span class="value">@(Model.Device.Hardware?.DiskFreeGb ?? 0) GB Free</span>
-                <small>of @Model.Device.Hardware?.DiskTotalGb GB Total</small>
+                <span class="value">@(Model.Device.Hardware?.DiskPercent ?? 0)% Used</span>
+                <div class="progress-bar">
+                    <div class="fill" style="width: @(Model.Device.Hardware?.DiskPercent ?? 0)%"></div>
+                </div>
+                <small>@(Model.Device.Hardware?.DiskFreeGb ?? 0) GB free / @(Model.Device.Hardware?.DiskTotalGb ?? 0) GB Total</small>
             </div>
         </div>
     </div>
@@ -56,6 +59,18 @@
             <tr>
                 <th>IP Address</th>
                 <td>@Model.Device.IpAddress</td>
+            </tr>
+            <tr>
+                <th>MAC Address</th>
+                <td>@(string.IsNullOrEmpty(Model.Device.MacAddress) ? "-" : Model.Device.MacAddress)</td>
+            </tr>
+            <tr>
+                <th>Network Status</th>
+                <td>
+                    <span class="status-badge @(Model.Device.NetworkStatus == POSMonitor.Shared.Enums.NetworkStatus.Connected ? "success" : "danger")">
+                        @Model.Device.NetworkStatus
+                    </span>
+                </td>
             </tr>
             <tr>
                 <th>Last Seen</th>

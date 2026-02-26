@@ -5,6 +5,7 @@ namespace POSMonitor.Shared.Models;
 public record HardwareSnapshotDto(
     [property: JsonPropertyName("cpuPercent")] double CpuPercent,
     [property: JsonPropertyName("memoryPercent")] double MemoryPercent,
+    [property: JsonPropertyName("diskPercent")] double DiskPercent,
     [property: JsonPropertyName("diskFreeGb")] double DiskFreeGb,
     [property: JsonPropertyName("diskTotalGb")] double DiskTotalGb,
     [property: JsonPropertyName("totalMemoryGb")] double TotalMemoryGb,

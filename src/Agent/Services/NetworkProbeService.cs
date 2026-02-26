@@ -17,9 +17,10 @@ public class NetworkProbeService
         _logger = logger;
     }
 
-    public async Task<(NetworkStatus status, string ipAddress)> ProbeAsync(CancellationToken cancellationToken)
+    public async Task<(NetworkStatus status, string ipAddress, string macAddress)> ProbeAsync(CancellationToken cancellationToken)
     {
         var localIp = GetLocalIpAddress();
+        var macAddress = GetMacAddress();
 
         foreach (var host in _options.PingHosts)
         {
@@ -29,7 +30,7 @@ public class NetworkProbeService
                 var reply = await ping.SendPingAsync(host, _options.TimeoutMilliseconds);
                 if (reply.Status == IPStatus.Success)
                 {
-                    return (NetworkStatus.Connected, localIp);
+                    return (NetworkStatus.Connected, localIp, macAddress);
                 }
             }
             catch (Exception ex)
@@ -38,7 +39,7 @@ public class NetworkProbeService
             }
         }
 
-        return (NetworkStatus.Disconnected, localIp);
+        return (NetworkStatus.Disconnected, localIp, macAddress);
     }
 
     private static string GetLocalIpAddress()
@@ -53,6 +54,27 @@ public class NetworkProbeService
         catch
         {
             return "0.0.0.0";
+        }
+    }
+
+    private static string GetMacAddress()
+    {
+        try
+        {
+            var macAddr = (
+                from nic in NetworkInterface.GetAllNetworkInterfaces()
+                where nic.OperationalStatus == OperationalStatus.Up
+                select nic.GetPhysicalAddress().ToString()
+            ).FirstOrDefault();
+
+            if (string.IsNullOrEmpty(macAddr)) return "-";
+            
+            // Format MAC address with hyphens (e.g., 00-11-22-33-44-55)
+            return string.Join("-", Enumerable.Range(0, macAddr.Length / 2).Select(i => macAddr.Substring(i * 2, 2)));
+        }
+        catch
+        {
+            return "-";
         }
     }
 }

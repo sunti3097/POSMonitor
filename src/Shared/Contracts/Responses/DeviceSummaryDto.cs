@@ -8,6 +8,7 @@ public record DeviceSummaryDto(
     [property: JsonPropertyName("deviceId")] string DeviceId,
     [property: JsonPropertyName("hostname")] string Hostname,
     [property: JsonPropertyName("ipAddress")] string IpAddress,
+    [property: JsonPropertyName("macAddress")] string MacAddress,
     [property: JsonPropertyName("status")] DeviceStatus Status,
     [property: JsonPropertyName("networkStatus")] NetworkStatus NetworkStatus,
     [property: JsonPropertyName("lastHeartbeatAt")] DateTimeOffset? LastHeartbeatAt,
