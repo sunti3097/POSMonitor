@@ -64,6 +64,10 @@ public class HardwareMetricsProvider : IDisposable
         try
         {
             var systemDrive = DriveInfo.GetDrives()
+                .FirstOrDefault(d => d.IsReady && d.Name.StartsWith("C", StringComparison.OrdinalIgnoreCase));
+
+            // Fallback to largest drive if C: is somehow not found
+            systemDrive ??= DriveInfo.GetDrives()
                 .Where(d => d.IsReady)
                 .OrderByDescending(d => d.TotalSize)
                 .FirstOrDefault();
