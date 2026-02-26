@@ -111,9 +111,13 @@ public class Worker : BackgroundService
         var services = await _serviceStatusCollector.CollectAsync(cancellationToken);
         var processes = await _processMonitorService.CollectAsync(cancellationToken);
 
+        var hostname = string.IsNullOrWhiteSpace(_options.HostnameOverride) 
+            ? (Environment.MachineName ?? System.Net.Dns.GetHostName() ?? "Unknown-PC") 
+            : _options.HostnameOverride;
+
         return new HeartbeatReport(
             _options.DeviceId,
-            _options.HostnameOverride ?? Environment.MachineName,
+            hostname,
             ipAddress,
             macAddress,
             networkStatus,

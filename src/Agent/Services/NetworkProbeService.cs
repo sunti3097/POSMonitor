@@ -8,12 +8,12 @@ namespace POSMonitor.Agent.Services;
 
 public class NetworkProbeService
 {
-    private readonly MonitoringTargetsOptions.NetworkOptions _options;
+    private readonly MonitoringTargetsOptions _options;
     private readonly ILogger<NetworkProbeService> _logger;
 
     public NetworkProbeService(IOptions<MonitoringTargetsOptions> monitoringOptions, ILogger<NetworkProbeService> logger)
     {
-        _options = monitoringOptions.Value.Network;
+        _options = monitoringOptions.Value;
         _logger = logger;
     }
 
@@ -22,12 +22,14 @@ public class NetworkProbeService
         var localIp = GetLocalIpAddress();
         var macAddress = GetMacAddress();
 
-        foreach (var host in _options.PingHosts)
+        var targets = _options.PingTargets?.Any() == true ? _options.PingTargets : new List<string> { "8.8.8.8" };
+
+        foreach (var host in targets)
         {
             try
             {
                 using var ping = new Ping();
-                var reply = await ping.SendPingAsync(host, _options.TimeoutMilliseconds);
+                var reply = await ping.SendPingAsync(host, 1500);
                 if (reply.Status == IPStatus.Success)
                 {
                     return (NetworkStatus.Connected, localIp, macAddress);
